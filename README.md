@@ -1,6 +1,6 @@
 # CNN_AidedDiagnosisTool
 Software for Diagnosis based on Convolutional Neural Network.
-More informations available in the file: [Project Description](ProjectDescription.md).
+More informations available in the file: [Project Description](ProjectDescription.pdf).
 
 ## Preliminary rules
 1. Note that **independence and autonomy** in solving the project assignment is a matter of evaluation. **Please avoid to ask questions about implementation issues**. This kind of problems must be solved by yourselves, you can ask but such questions are kept into consideration for the final evaluation or even ignored.

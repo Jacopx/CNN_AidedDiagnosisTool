@@ -26,7 +26,7 @@ More informations available in the file: [Project Description](ProjectDescriptio
 All the documentation will be available in the [Documents](documents/) folder.
 
 ## Environment
-Before launching the project is important to install the proper package by executing the command:
+Before launching the project is important to install the proper package (make use of [Virtual Environment](https://realpython.com/python-virtual-environments-a-primer/)) by executing the command:
 ```
 pip3 install -r requirements.txt
 ```

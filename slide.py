@@ -2,18 +2,11 @@
 # *                          CNN_AidedDiagnosisTool                         *
 # *            https://github.com/Jacopx/CNN_AidedDiagnosisTool             *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-import slide
-import os
-
-DATASET_FOLDER = "dataset"
+import openslide
 
 
-def main():
-    print("Opening Whole-slide")
-    for filename in os.listdir(DATASET_FOLDER):
-        if filename.endswith(".svs"):
-            slide.slide_info(DATASET_FOLDER + "/" + filename)
-
-
-if __name__ == "__main__":
-    main()
+def slide_info(slide_path):
+    slide = openslide.open_slide(slide_path)
+    width = int(slide.dimensions[0])
+    height = int(slide.dimensions[1])
+    print(slide.properties)

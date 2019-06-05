@@ -23,7 +23,7 @@ More informations available in the file: [Project Description](ProjectDescriptio
 * **_Slide_**: must be used during oral discussion. Follow the structure of your report.
 * **_Code_**: all the code you used must be provided. Carefully comment it and keep it well organized. Such criteria are matter of evaluation.
 
-All the documentation will be available in the [Documents](documents/) folder.
+All the documentation will be available in the [documents](documents/) folder.
 
 ## Environment
 Before launching the project is important to install the proper package (make use of [Virtual Environment](https://realpython.com/python-virtual-environments-a-primer/)) by executing the command:

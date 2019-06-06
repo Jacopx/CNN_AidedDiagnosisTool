@@ -10,9 +10,10 @@ DATASET_FOLDER = "dataset"
 
 def main():
     print("Opening Whole-slide")
-    for filename in os.listdir(DATASET_FOLDER):
-        if filename.endswith(".svs"):
-            slide.slide_info(DATASET_FOLDER + "/" + filename)
+    # for filename in os.listdir(DATASET_FOLDER):
+    #     if filename.endswith(".svs"):
+    #         slide.slide_info(DATASET_FOLDER + "/" + filename)
+    slide.slide_info(DATASET_FOLDER + "/2_AC_1.svs")
 
 
 if __name__ == "__main__":

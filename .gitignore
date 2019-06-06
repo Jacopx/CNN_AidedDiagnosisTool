@@ -1,6 +1,8 @@
 .idea
 dataset/*
 !dataset/.waste
+crop/*
+!crop/.waste
 
 .DS_store
 

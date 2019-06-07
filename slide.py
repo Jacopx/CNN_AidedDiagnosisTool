@@ -15,5 +15,6 @@ def slide_info(slide_path):
     w_sample = width // SAMPLE_SIZE + 1
     h_sample = height // SAMPLE_SIZE + 1
     print(slide_path, end=" ==> ")
-    print(width, height, end=" / ")
-    print(w_sample, h_sample)
+    """print(width, height)
+    print(w_sample, h_sample)"""
+    return width, height

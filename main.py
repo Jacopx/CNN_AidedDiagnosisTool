@@ -4,21 +4,30 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 import slide
 import os
+import sys
 
-DATASET_FOLDER = "dataset"
+DATASET_FOLDER = sys.argv[1]
+
+
+def min_max_ss():
+    size_list = []
+
+    for filename in os.listdir(DATASET_FOLDER):
+        if filename.endswith(".svs"):
+            w_temp, h_temp = slide.get_slidepath_size(DATASET_FOLDER + "/" + filename)
+            size_list.append(w_temp)
+            size_list.append(h_temp)
+    return min(size_list)
 
 
 def main():
     # Production
+
+    ss = min_max_ss()
     for filename in os.listdir(DATASET_FOLDER):
         if filename.endswith(".svs"):
-            slide.slide_info(DATASET_FOLDER + "/" + filename)
-            slide.crop(DATASET_FOLDER, os.path.splitext(filename)[0], filename)
+            slide.overlap_crop_multithread(DATASET_FOLDER, filename, ss)
 
-    # DEBUG
-    # slide.slide_info(DATASET_FOLDER + "/2_AC_1.svs")
-    # slide.crop(DATASET_FOLDER, "2_AC_1", "2_AC_1.svs")
-
-
+    
 if __name__ == "__main__":
     main()

@@ -7,10 +7,12 @@ import time
 import os
 import math
 from threading import Thread
+import utils
 
 
 LVL = 0  # Level of dimensionality
-CROP_FOLDER = "cropped_dataset"
+CROP_FOLDER = "resources/cropped_dataset"
+SCALE_FACTOR = 32
 
 
 def open_slide(slide_path):
@@ -66,12 +68,7 @@ def get_slide_size(slide):
 
 
 def make_crop_folder(algorithm, custom_ss):
-    try:
-        # Create target Directory
-        os.makedirs(CROP_FOLDER + "/" + algorithm + "/" + str(custom_ss))
-        print("Directory ", CROP_FOLDER + "/" + algorithm + "/" + str(custom_ss), " Created ")
-    except FileExistsError:
-        print("Directory ", CROP_FOLDER + "/" + algorithm + "/" + str(custom_ss), " already exists")
+    utils.make_folder(CROP_FOLDER + "/" + algorithm + "/" + str(custom_ss))
 
 
 """

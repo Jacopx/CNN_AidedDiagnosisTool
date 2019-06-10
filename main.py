@@ -22,12 +22,11 @@ def min_max_ss():
 
 def main():
     # Production
-
     ss = min_max_ss()
     for filename in os.listdir(DATASET_FOLDER):
         if filename.endswith(".svs"):
             slide.overlap_crop_multithread(DATASET_FOLDER, filename, ss)
 
-    
+
 if __name__ == "__main__":
     main()

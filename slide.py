@@ -8,27 +8,30 @@ import math
 from threading import Thread
 import utils
 import logger as log
+import sys
 
 
 LVL = 0  # Level of dimensionality
 CROP_FOLDER = "resources/cropped_dataset"
-SCALE_FACTOR = 5
+SCALE_FACTOR = 24
 
 
 def open_slide(slide_path):
     start_time = time.time()
     slide = openslide.open_slide(slide_path)
     elapsed_time = time.time() - start_time
-    log.print_debug("Opened slide " + slide_path + " || Time Elapsed: " + str(elapsed_time))
+    log.print_debug("Opened slide " + slide_path + " || Shape: " + str(get_slide_size(slide)) + " || Time Elapsed: " + str(elapsed_time))
     return slide
 
 
 def slide_to_image(slide):
     start_time = time.time()
+    log.print_debug("Converting slide to image. Requires time!")
     width, height = get_slide_size(slide)
+    # MAX width*height = 2**29!!!!!!! IMPORTANT
     image = slide.read_region((0, 0), LVL, (width, height))
     elapsed_time = time.time() - start_time
-    log.print_debug("Converted slide to image || Time Elapsed: " + str(elapsed_time))
+    log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image
 
 
@@ -37,7 +40,7 @@ def resize_image_r(image, scale_factor):
     width, height = image.size
     image_r = image.resize((int(width / scale_factor), int(height / scale_factor)))
     elapsed_time = time.time() - start_time
-    log.print_debug("Image resized || Time Elapsed: " + str(elapsed_time))
+    log.print_debug("Image resized || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image_r
 
 

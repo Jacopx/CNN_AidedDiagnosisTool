@@ -35,7 +35,7 @@ def produce_crops(folder):
 
 def main():
     start_time = time.time()
-    s = slide.open_slide(DATASET_FOLDER+"\\2_AC_1.svs")
+    s = slide.open_slide(DATASET_FOLDER+"\\2_AC_1")
     image = slide.slide_to_image(s)
     image_rgb = image.convert('RGB')
     image_resized = slide.resize_image_r(image_rgb, slide.SCALE_FACTOR)
@@ -43,11 +43,14 @@ def main():
     np_grayscale = filter.filter_np_rgb_to_grayscale(np_rgb)
     np_grayscale_complemented = filter.complement_np(np_grayscale)
     np_complemented_binary = filter.filter_np_threshold(np_grayscale_complemented)
+    np_masked = filter.apply_mask(np_rgb, np_complemented_binary)
     image_grayscale_complemented = utils.np_to_pil(np_grayscale_complemented, utils.GRAY_SCALE)
     image_complemented_binary = utils.np_to_pil(np_complemented_binary, utils.GRAY_SCALE)
+    image_rgb_masked = utils.np_to_pil(np_masked, utils.COLOR)
     utils.save_image(image_resized, "filter", "temp_rgb.png")
     utils.save_image(image_grayscale_complemented, "filter", "temp_gs_c.png")
     utils.save_image(image_complemented_binary, "filter", "temp_bw_c.png")
+    utils.save_image(image_rgb_masked, "filter", "final_cl.png")
     elapsed_time = time.time() - start_time
     log.print_debug("TOTAL TIME FOR IMAGE PROCESSING: " + str(elapsed_time))
 

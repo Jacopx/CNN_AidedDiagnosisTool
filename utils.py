@@ -55,4 +55,3 @@ def save_image(image, folder, filename):
     image.save("resources/" + str(folder) + "/" + str(filename), "PNG")
     elapsed_time = time.time() - start_time
     log.print_debug("Image resources/" + str(folder) + "/" + str(filename) + " saved || Time Elapsed: " + str(elapsed_time))
-

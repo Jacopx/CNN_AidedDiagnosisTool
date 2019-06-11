@@ -65,3 +65,13 @@ def filter_np_threshold(np_image):
     log.print_debug("Threshold applied || Shape: " + str(np_binary.shape) + "+ || Time Elapsed: " + str(elapsed_time))
     return np_binary
 
+
+def apply_mask(np_rgb_image, np_mask):
+    start_time = time.time()
+    np_rgb_masked = np.zeros(np_rgb_image.shape)
+    np_rgb_masked[:, :, 0] = np_rgb_image[:, :, 0] * (np_mask/255)
+    np_rgb_masked[:, :, 1] = np_rgb_image[:, :, 1] * (np_mask/255)
+    np_rgb_masked[:, :, 2] = np_rgb_image[:, :, 2] * (np_mask/255)
+    elapsed_time = time.time() - start_time
+    log.print_debug("Mask applied || Time Elapsed: " + str(elapsed_time))
+    return np_rgb_masked

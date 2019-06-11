@@ -12,7 +12,7 @@ import logger as log
 
 LVL = 0  # Level of dimensionality
 CROP_FOLDER = "resources/cropped_dataset"
-SCALE_FACTOR = 10
+SCALE_FACTOR = 5
 
 
 def open_slide(slide_path):

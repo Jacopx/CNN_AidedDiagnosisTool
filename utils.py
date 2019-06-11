@@ -12,9 +12,10 @@ import logger as log
 import time
 
 
-GRAY_SCALE = "L" # (8-bit pixels, black and white)
-COLOR = "RGB" # (3x8-bit pixels, true color)
-COLOR_ALPHA = "RGBA" # (4x8-bit pixels, true color with transparency mask)
+BLACK_WHITE = "1"  # (1-bit pixels, black and white, stored with one pixel per byte)
+GRAY_SCALE = "L"  # (8-bit pixels, black and white)
+COLOR = "RGB"  # (3x8-bit pixels, true color)
+COLOR_ALPHA = "RGBA"  # (4x8-bit pixels, true color with transparency mask)
 
 
 def make_folder(folder_name):

@@ -4,7 +4,6 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 import openslide
 import time
-import os
 import math
 from threading import Thread
 import utils
@@ -12,7 +11,7 @@ import utils
 
 LVL = 0  # Level of dimensionality
 CROP_FOLDER = "resources/cropped_dataset"
-SCALE_FACTOR = 32
+SCALE_FACTOR = 10
 
 
 def open_slide(slide_path):
@@ -24,9 +23,9 @@ def slide_to_image(slide):
     return slide.read_region((0, 0), LVL, (width, height))
 
 
-def resize_image_r(image, resize_ratio):
+def resize_image_r(image, scale_factor):
     width, height = image.size
-    return image.resize((int(width * resize_ratio), int(height * resize_ratio)))
+    return image.resize((int(width / scale_factor), int(height / scale_factor)))
 
 
 def resize_image_a(image, width, height):

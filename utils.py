@@ -8,6 +8,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import logger as log
+import time
 
 
 GRAY_SCALE = "L" # (8-bit pixels, black and white)
@@ -19,17 +21,25 @@ def make_folder(folder_name):
     try:
         # Create target Directory
         os.makedirs(folder_name)
-        print("Directory ", str(folder_name), " Created ")
+        log.print_info(" Directory " + str(folder_name) + " created ")
     except FileExistsError:
-        print("Directory ", str(folder_name), " already exists")
+        log.print_info(" Directory " + str(folder_name) + " already exists")
 
 
 def image_to_np_rgb(image):
-    return np.asarray(image, dtype="int32")
+    start_time = time.time()
+    np_image = np.asarray(image, dtype="int32")
+    elapsed_time = time.time() - start_time
+    log.print_debug("Image converted to array || Time Elapsed: " + str(elapsed_time))
+    return np_image
 
 
 def np_to_pil(array, mode):
-    return Image.fromarray(np.asarray(np.clip(array, 0, 255), dtype="uint8"), mode)
+    start_time = time.time()
+    image = Image.fromarray(np.asarray(np.clip(array, 0, 255), dtype="uint8"), mode)
+    elapsed_time = time.time() - start_time
+    log.print_debug("Array converted to image || Time Elapsed: " + str(elapsed_time))
+    return image
 
 
 def plot_image(image):
@@ -39,8 +49,9 @@ def plot_image(image):
 
 
 def save_image(image, folder, filename):
+    start_time = time.time()
     make_folder("resources/" + str(folder))
     image.save("resources/" + str(folder) + "/" + str(filename), "PNG")
-
-
+    elapsed_time = time.time() - start_time
+    log.print_debug("Image resources/" + str(folder) + "/" + str(filename) + " saved || Time Elapsed: " + str(elapsed_time))
 

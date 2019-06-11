@@ -7,6 +7,7 @@ import os
 import sys
 import utils
 import filter
+import logger
 
 DATASET_FOLDER = sys.argv[1]
 
@@ -31,16 +32,11 @@ def produce_crops(folder):
 
 
 def main():
-    s = slide.open_slide(DATASET_FOLDER+"/2_AC_1.svs")
-    print("\n.", end="")
+    s = slide.open_slide(DATASET_FOLDER+"\\2_AC_1.svs")
     image = slide.slide_to_image(s)
-    print(".", end="")
     image_rgb = image.convert('RGB')
-    print(".", end="")
     image_resized = slide.resize_image_r(image_rgb, slide.SCALE_FACTOR)
-    print(".", end="")
     np_rgb = utils.image_to_np_rgb(image_resized)
-    print(".", end="")
     np_grayscale = filter.filter_np_rgb_to_grayscale(np_rgb)
     np_complemented = filter.complement_np(np_grayscale)
     image_grayscale_complemented = utils.np_to_pil(np_complemented, utils.GRAY_SCALE)

@@ -7,6 +7,7 @@ import time
 import math
 from threading import Thread
 import utils
+import logger as log
 
 
 LVL = 0  # Level of dimensionality
@@ -15,21 +16,37 @@ SCALE_FACTOR = 10
 
 
 def open_slide(slide_path):
-    return openslide.open_slide(slide_path)
+    start_time = time.time()
+    slide = openslide.open_slide(slide_path)
+    elapsed_time = time.time() - start_time
+    log.print_debug("Opened slide " + slide_path + " || Time Elapsed: " + str(elapsed_time))
+    return slide
 
 
 def slide_to_image(slide):
+    start_time = time.time()
     width, height = get_slide_size(slide)
-    return slide.read_region((0, 0), LVL, (width, height))
+    image = slide.read_region((0, 0), LVL, (width, height))
+    elapsed_time = time.time() - start_time
+    log.print_debug("Converted slide to image || Time Elapsed: " + str(elapsed_time))
+    return image
 
 
 def resize_image_r(image, scale_factor):
+    start_time = time.time()
     width, height = image.size
-    return image.resize((int(width / scale_factor), int(height / scale_factor)))
+    image_r = image.resize((int(width / scale_factor), int(height / scale_factor)))
+    elapsed_time = time.time() - start_time
+    log.print_debug("Image resized || Time Elapsed: " + str(elapsed_time))
+    return image_r
 
 
 def resize_image_a(image, width, height):
-    return image.resize((int(width), int(height)))
+    start_time = time.time()
+    image_r = image.resize((int(width), int(height)))
+    elapsed_time = time.time() - start_time
+    log.print_debug("Image resized || Time Elapsed: " + str(elapsed_time))
+    return image_r
 
 
 def slide_info(slide_path):
@@ -149,10 +166,8 @@ def overlap_crop_singleprocess(dataset_folder, slide_name_ex, custom_ss):
 
 
 def custom_crop(image, box, crop_name):
-    print("Processing crop: " + crop_name)
     crop_region = image.crop(box)
     crop_region.save(crop_name)
-    print("Saved crop: " + crop_name)
 
 
 def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
@@ -171,9 +186,7 @@ def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
     slide_path = dataset_folder + "/" + slide_name_ex
     slide_name = slide_name_ex.split(".")[0]
     slide = open_slide(slide_path)
-    print("Getting image ", slide_name)
     image = slide_to_image(slide, None)
-    print("Converted ", slide_name)
     width, height = get_slide_size(slide)
     # Computing number of windows
     w_windows = int(math.ceil(width / custom_ss))
@@ -209,9 +222,8 @@ def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
             pool[-1].start()
     for p in pool:
         p.join()
-    print("---------------------------------------------------------")
     elapsed_time = time.time() - start_time
-    print("\n # Crop: " + str(crop_number+1) + " || Time Elapsed: " + str(elapsed_time))
+    log.print_debug(str(crop_number+1) + " crops produced || Time Elapsed: " + str(elapsed_time))
 
 
 """

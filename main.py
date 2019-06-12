@@ -36,6 +36,7 @@ def produce_crops():  # Produce the crop for the training
 
 def main():
     start_time = time.time()
+    slide.overlap_crop_multithread(DATASET_FOLDER, "2_AC_1.svs", 3190)
     """
     slide_path = path.join(DATASET_FOLDER, "2_AC_1.svs")
     s = slide.open_slide(slide_path)

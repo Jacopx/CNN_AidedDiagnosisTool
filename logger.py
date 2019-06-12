@@ -5,31 +5,43 @@
 
 import logging
 import coloredlogs
+import sys
 
 
 logger = None
+verbose = None
 
 
 def get_logger():
-    global logger
-    if logger is None:
-        coloredlogs.install(level="DEBUG")
-        logger = logging.getLogger()
+    global logger, verbose
+    try:
+        verbose = sys.argv[2]
+    except Exception:
+        verbose = None
+    if verbose is not None:
+        if logger is None:
+            coloredlogs.install(level="DEBUG")
+            logger = logging.getLogger()
+    else:
+        logger = None
 
 
 def print_debug(message):
     global logger
     get_logger()
-    logger.debug(message)
+    if logger is not None:
+        logger.debug(message)
 
 
 def print_info(message):
     global logger
     get_logger()
-    logger.info(message)
+    if logger is not None:
+        logger.info(message)
 
 
 def print_error(message):
     global logger
     get_logger()
-    logger.error(message)
+    if logger is not None:
+        logger.error(message)

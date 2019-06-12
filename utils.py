@@ -51,7 +51,7 @@ def plot_image(image):
 
 def save_image(image, folder, filename):
     start_time = time.time()
-    make_folder("resources/" + str(folder))
-    image.save("resources/" + str(folder) + "/" + str(filename), "PNG")
+    path = os.path.join(str(folder), str(filename))
+    image.save(path, "PNG")
     elapsed_time = time.time() - start_time
-    log.print_debug("Image resources/" + str(folder) + "/" + str(filename) + " saved || Time Elapsed: " + str(elapsed_time))
+    log.print_debug("Image" + str(path) + " saved || Time Elapsed: " + str(elapsed_time))

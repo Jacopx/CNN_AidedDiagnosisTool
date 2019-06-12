@@ -211,9 +211,10 @@ def overlap_crop_singleprocess(dataset_folder, slide_name_ex, custom_ss):
 # Parameters : image -> PIL.Image to be cropped
 #              box -> coordinates of crop region
 #              crop_name -> string defining path name for saving image
-def custom_crop(image, box, crop_name):
+def custom_crop(image, box, folder, crop_name):
     crop_region = image.crop(box)
-    crop_region.save(crop_name)
+    utils.save_image(crop_region, folder, crop_name)
+    # crop_region.save(crop_name)
 
 
 # Perform an overlapped crop all over an Openslide slide
@@ -264,8 +265,9 @@ def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
         for j in range(0, len(y_p)):
             crop_number += 1
             box = (x_p[i], y_p[j], x_p[i] + custom_ss, y_p[j] + custom_ss)
-            crop_name = CROP_FOLDER + "/" + algorithm_crop_folder + "/" + str(custom_ss) + "/" + slide_name + "_" + str(i) + 'x' + str(j) + ".png"
-            pool.append(Thread(target=custom_crop, args=(image, box, crop_name,)))
+            crop_folder = path.join(CROP_FOLDER, algorithm_crop_folder, str(custom_ss))
+            crop_name = slide_name+'_'+str(i)+'x'+str(j)+".png"
+            pool.append(Thread(target=custom_crop, args=(image, box, crop_folder, crop_name,)))
             pool[-1].start()
     for p in pool:
         p.join()

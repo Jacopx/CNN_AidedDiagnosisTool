@@ -7,6 +7,9 @@ from PIL import  Image
 import numpy as np
 import time
 import logger as log
+from os import path
+
+FILTER_FOLDER = path.join("resources", "filtered")
 
 
 def filter_np_rgb_to_grayscale(np_image):

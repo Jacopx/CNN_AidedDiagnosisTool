@@ -17,14 +17,31 @@ CROP_FOLDER = path.join("resources", "cropped_dataset")
 SCALE_FACTOR = 24
 
 
+# Open a svs slide
+# Parameters : slide_path -> string defining path of slide to be opened
+# Return : the slide if path corresponds to a .svs file, None otherwise
 def open_slide(slide_path):
     start_time = time.time()
-    slide = openslide.open_slide(slide_path)
+    try:
+        # Create target Directory
+        slide = openslide.open_slide(slide_path)
+    except Exception:
+        slide = None
     elapsed_time = time.time() - start_time
-    log.print_debug("Opened slide " + slide_path + " || Shape: " + str(get_slide_size(slide)) + " || Time Elapsed: " + str(elapsed_time))
+    if slide is None:
+        log.print_error(
+            "Cannot open slide " + slide_path + " || Time Elapsed: " + str(
+                elapsed_time))
+    else:
+        log.print_debug(
+            "Opened slide " + slide_path + " || Shape: " + str(get_slide_size(slide)) + " || Time Elapsed: " + str(
+                elapsed_time))
     return slide
 
 
+# Convert a svs slide into a PIL.Image
+# Parameters : slide -> Openslide slide to be converted
+# Return : the converted image
 def slide_to_image(slide):
     start_time = time.time()
     log.print_debug("Converting slide to image. Requires time!")
@@ -36,6 +53,10 @@ def slide_to_image(slide):
     return image
 
 
+# Resize a PIL.Image
+# Parameters : image -> PIL.Image to be scaled
+#              scale_factor -> factor by which image has to be scaled
+# Return : the resized image
 def resize_image_r(image, scale_factor):
     start_time = time.time()
     width, height = image.size
@@ -45,6 +66,11 @@ def resize_image_r(image, scale_factor):
     return image_r
 
 
+# Resize a PIL.Image
+# Parameters : image -> PIL.Image to be scaled
+#              width -> width that resized image will have
+#              height -> height that resized image will have
+# Return : the resized image
 def resize_image_a(image, width, height):
     start_time = time.time()
     image_r = image.resize((int(width), int(height)))
@@ -53,6 +79,8 @@ def resize_image_a(image, width, height):
     return image_r
 
 
+# Print info related to an Openslide slide
+# Parameters : slide_path -> string defining path of slide whose info are required
 def slide_info(slide_path):
     print("Whole-slide info ", end="")
     slide = open_slide(slide_path)
@@ -65,10 +93,12 @@ def slide_info(slide_path):
     print("\tLevel dimension: " + str(slide.level_dimensions))
 
 
+# Obtain Openslide slide dimensions
+# Parameters : slide_path -> string defining path of slide whose dimensions are required
+# Return : the Openslide slide dimensions
 def get_slidepath_size(slide_path):
     if slide_path is not None:
         slide = open_slide(slide_path)
-
     if slide is not None:
         width = int(slide.dimensions[0])
         height = int(slide.dimensions[1])
@@ -78,6 +108,9 @@ def get_slidepath_size(slide_path):
     return width, height
 
 
+# Obtain Openslide slide dimensions
+# Parameters : slide -> Openslide slide whose dimensions are required
+# Return : the Openslide slide dimensions
 def get_slide_size(slide):
     if slide is not None:
         width = int(slide.dimensions[0])
@@ -88,6 +121,9 @@ def get_slide_size(slide):
     return width, height
 
 
+# Create folder for cropped dataset [ ./CROP_FOLDER/algorithm/custom_ss ]
+# Parameters : algorithm -> a string defining the algorithm used for cropping images
+#              custom_ss -> value of sample size used to perform crops
 def make_crop_folder(algorithm, custom_ss):
     folder_path = path.join(CROP_FOLDER, algorithm, str(custom_ss))
     utils.make_folder(folder_path)
@@ -171,19 +207,24 @@ def overlap_crop_singleprocess(dataset_folder, slide_name_ex, custom_ss):
 """
 
 
+# Crop an image and save the cropped frame
+# Parameters : image -> PIL.Image to be cropped
+#              box -> coordinates of crop region
+#              crop_name -> string defining path name for saving image
 def custom_crop(image, box, crop_name):
     crop_region = image.crop(box)
     crop_region.save(crop_name)
 
-"""
+
+# Perform an overlapped crop all over an Openslide slide
+# Parameters : dataset_folder -> path of the folder where slide is located
+#              slide_name_ex -> slide name
+#              custom_ss -> value of sample size used to perform crops
 def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
-
     start_time = time.time()
-
     pool = []
     x_p = []
     y_p = []
-
     # Folder Creation (if not exist)
     algorithm_crop_folder = "overlap_no_padding"
     make_crop_folder(algorithm_crop_folder, custom_ss)
@@ -232,6 +273,7 @@ def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
     log.print_debug(str(crop_number+1) + " crops produced || Time Elapsed: " + str(elapsed_time))
 
 
+"""
 def resize_crop(folder, file_folder, slide, custom_ss):
     start_time = time.time()
     make_crop_folder("resize", custom_ss)

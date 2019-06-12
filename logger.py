@@ -28,3 +28,8 @@ def print_info(message):
     get_logger()
     logger.info(message)
 
+
+def print_error(message):
+    global logger
+    get_logger()
+    logger.error(message)

@@ -6,7 +6,6 @@ import slide
 import os
 from os import path
 import sys
-import numpy as np
 import utils
 import filter
 import time
@@ -27,7 +26,7 @@ def min_max_ss():  # Get the greatest dimension of the dataset of training
     return min(size_list)
 
 
-def produce_crops(folder):  # Produce the crop for the training
+def produce_crops():  # Produce the crop for the training
     # Production
     ss = min_max_ss()
     for filename in os.listdir(DATASET_FOLDER):
@@ -37,6 +36,7 @@ def produce_crops(folder):  # Produce the crop for the training
 
 def main():
     start_time = time.time()
+    """
     slide_path = path.join(DATASET_FOLDER, "2_AC_1.svs")
     s = slide.open_slide(slide_path)
     image = slide.slide_to_image(s)
@@ -54,6 +54,7 @@ def main():
     utils.save_image(image_grayscale_complemented, "filter", "temp_gs_c.png")
     utils.save_image(image_complemented_binary, "filter", "temp_bw_c.png")
     utils.save_image(image_rgb_masked, "filter", "final_cl.png")
+    """
     elapsed_time = time.time() - start_time
     log.print_debug("TOTAL TIME FOR IMAGE PROCESSING: " + str(elapsed_time))
 

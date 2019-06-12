@@ -4,6 +4,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 import slide
 import os
+from os import path
 import sys
 import numpy as np
 import utils
@@ -14,18 +15,19 @@ import logger as log
 DATASET_FOLDER = sys.argv[1]
 
 
-def min_max_ss():
+def min_max_ss():  # Get the greatest dimension of the dataset of training
     size_list = []
 
     for filename in os.listdir(DATASET_FOLDER):
         if filename.endswith(".svs"):
-            w_temp, h_temp = slide.get_slidepath_size(DATASET_FOLDER + "/" + filename)
+            slide_path = path.join(DATASET_FOLDER, filename)
+            w_temp, h_temp = slide.get_slidepath_size(slide_path)
             size_list.append(w_temp)
             size_list.append(h_temp)
     return min(size_list)
 
 
-def produce_crops(folder):
+def produce_crops(folder):  # Produce the crop for the training
     # Production
     ss = min_max_ss()
     for filename in os.listdir(DATASET_FOLDER):
@@ -35,7 +37,8 @@ def produce_crops(folder):
 
 def main():
     start_time = time.time()
-    s = slide.open_slide(DATASET_FOLDER+"\\2_AC_1")
+    slide_path = path.join(DATASET_FOLDER, "2_AC_1.svs")
+    s = slide.open_slide(slide_path)
     image = slide.slide_to_image(s)
     image_rgb = image.convert('RGB')
     image_resized = slide.resize_image_r(image_rgb, slide.SCALE_FACTOR)

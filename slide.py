@@ -9,10 +9,11 @@ from threading import Thread
 import utils
 import logger as log
 import sys
+from os import path
 
 
 LVL = 0  # Level of dimensionality
-CROP_FOLDER = "resources/cropped_dataset"
+CROP_FOLDER = path.join("resources", "cropped_dataset")
 SCALE_FACTOR = 24
 
 
@@ -66,13 +67,14 @@ def slide_info(slide_path):
 
 def get_slidepath_size(slide_path):
     if slide_path is not None:
-            slide = open_slide(slide_path)
+        slide = open_slide(slide_path)
+
     if slide is not None:
         width = int(slide.dimensions[0])
         height = int(slide.dimensions[1])
     else:
-        width = int(-1)
-        height = int(-1)
+        width = -1
+        height = -1
     return width, height
 
 
@@ -81,13 +83,14 @@ def get_slide_size(slide):
         width = int(slide.dimensions[0])
         height = int(slide.dimensions[1])
     else:
-        width = int(-1)
-        height = int(-1)
+        width = -1
+        height = -1
     return width, height
 
 
 def make_crop_folder(algorithm, custom_ss):
-    utils.make_folder(CROP_FOLDER + "/" + algorithm + "/" + str(custom_ss))
+    folder_path = path.join(CROP_FOLDER, algorithm, str(custom_ss))
+    utils.make_folder(folder_path)
 
 
 """
@@ -172,7 +175,7 @@ def custom_crop(image, box, crop_name):
     crop_region = image.crop(box)
     crop_region.save(crop_name)
 
-
+"""
 def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
 
     start_time = time.time()
@@ -186,10 +189,10 @@ def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
     make_crop_folder(algorithm_crop_folder, custom_ss)
 
     # Slide opening
-    slide_path = dataset_folder + "/" + slide_name_ex
+    slide_path = path.join(dataset_folder, slide_name_ex)
     slide_name = slide_name_ex.split(".")[0]
     slide = open_slide(slide_path)
-    image = slide_to_image(slide, None)
+    image = slide_to_image(slide)
     width, height = get_slide_size(slide)
     # Computing number of windows
     w_windows = int(math.ceil(width / custom_ss))
@@ -229,11 +232,10 @@ def overlap_crop_multithread(dataset_folder, slide_name_ex, custom_ss):
     log.print_debug(str(crop_number+1) + " crops produced || Time Elapsed: " + str(elapsed_time))
 
 
-"""
 def resize_crop(folder, file_folder, slide, custom_ss):
     start_time = time.time()
     make_crop_folder("resize", custom_ss)
-    slide_path = folder + "/" + slide
+    slide_path = path.join(folder, slide)
     slide = openslide.open_slide(slide_path)
     width = int(slide.dimensions[0])
     height = int(slide.dimensions[1])
@@ -271,9 +273,8 @@ def resize_crop(folder, file_folder, slide, custom_ss):
 
             print(box, end=" ==> ")
             crop_region = image.crop(box)
-            crop_name = CROP_FOLDER + "/resize/" + str(custom_ss) + "/" + file_folder + "_" + str(shift_w) + 'x' + str(
-                shift_h) + ".png"
-            crop_region.save(crop_name)
+            crop_name = path.join(CROP_FOLDER, 'resize', custom_ss, file_folder, "_", str(shift_w), "x", str(shift_h))
+            crop_region.save(crop_name + ".png")
             print(str(shift_w) + 'x' + str(shift_h))
             crop_number += 1
 

@@ -8,3 +8,4 @@ Pillow
 opencv-python
 scikit-image
 openslide-python
+coloredlogs

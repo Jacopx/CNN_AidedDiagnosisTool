@@ -3,6 +3,7 @@ dataset/*
 !dataset/.waste
 crop/*
 !crop/.waste
+resources/*
 
 .DS_store
 

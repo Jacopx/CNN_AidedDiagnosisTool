@@ -2,6 +2,8 @@
 # *                          CNN_AidedDiagnosisTool                         *
 # *            https://github.com/Jacopx/CNN_AidedDiagnosisTool             *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# *            utils.py : utils for images conversion and saving            *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 from PIL import Image
 import numpy as np

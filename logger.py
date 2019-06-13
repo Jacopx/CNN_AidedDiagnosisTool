@@ -2,23 +2,21 @@
 # *                          CNN_AidedDiagnosisTool                         *
 # *            https://github.com/Jacopx/CNN_AidedDiagnosisTool             *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# *                 logger.py : tool for logging mechanism                  *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 import logging
 import coloredlogs
-import sys
+import arguments
 
 
 logger = None
-verbose = None
+verbose = arguments.get_verbose()
 
 
 def get_logger():
     global logger, verbose
-    try:
-        verbose = sys.argv[2]
-    except Exception:
-        verbose = None
-    if verbose is not None:
+    if verbose is not False:
         if logger is None:
             coloredlogs.install(level="DEBUG")
             logger = logging.getLogger()

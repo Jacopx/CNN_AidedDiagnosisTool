@@ -2,6 +2,9 @@
 # *                          CNN_AidedDiagnosisTool                         *
 # *            https://github.com/Jacopx/CNN_AidedDiagnosisTool             *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#                  usage: main.py [-h] [-v] dataset_folder                  *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 import slide
 import os
 from os import path
@@ -10,8 +13,9 @@ import utils
 import filter
 import time
 import logger as log
+import arguments
 
-DATASET_FOLDER = sys.argv[1]
+DATASET_FOLDER = arguments.get_dataset_folder()
 
 
 def min_max_ss():  # Get the greatest dimension of the dataset of training
@@ -36,8 +40,10 @@ def produce_crops():  # Produce the crop for the training
 
 def main():
     start_time = time.time()
-    slide.overlap_crop_multithread(DATASET_FOLDER, "2_AC_1.svs", 3190)
+
     """
+    slide.overlap_crop_multithread(DATASET_FOLDER, "2_AC_1.svs", 3190)
+    
     slide_path = path.join(DATASET_FOLDER, "2_AC_1.svs")
     s = slide.open_slide(slide_path)
     image = slide.slide_to_image(s)

@@ -2,13 +2,15 @@
 # *                          CNN_AidedDiagnosisTool                         *
 # *            https://github.com/Jacopx/CNN_AidedDiagnosisTool             *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# *       slide.py : tools for crop mechanism and .svs file manipulation    *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 import openslide
 import time
 import math
 from threading import Thread
 import utils
 import logger as log
-import sys
 from os import path
 
 

@@ -12,6 +12,8 @@ from threading import Thread
 import utils
 import logger as log
 from os import path
+import numpy as np
+import cv2 as cv
 
 
 LVL = 0  # Level of dimensionality
@@ -53,6 +55,20 @@ def slide_to_image(slide):
     elapsed_time = time.time() - start_time
     log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image
+
+
+# Convert a PIL.Image to OpenCV.Image
+# Parameters : image -> PIL.Image to be converted
+# Return : the converted image
+def image_to_cv(image):
+    start_time = time.time()
+    log.print_debug("Converting image to cv format. Requires time!")
+    np_image = np.asarray(image)
+    # Convert RGB to BGR
+    open_cv_image = cv.cvtColor(np_image, cv.COLOR_RGB2BGR)
+    elapsed_time = time.time() - start_time
+    log.print_debug("Converted image to cv || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
+    return open_cv_image
 
 
 # Resize a PIL.Image

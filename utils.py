@@ -45,6 +45,12 @@ def np_to_pil(array, mode):
     return image
 
 
+def plot_histogram_lum(image):
+    plt.hist(image, bins=255)
+    plt.title("histogram")
+    plt.show()
+
+
 def plot_image(image):
     img = mpimg.imread(image)
     plt.imshow(img)
@@ -56,4 +62,4 @@ def save_image(image, folder, filename):
     path = os.path.join(str(folder), str(filename))
     image.save(path, "PNG")
     elapsed_time = time.time() - start_time
-    log.print_debug("Image" + str(path) + " saved || Time Elapsed: " + str(elapsed_time))
+    log.print_debug("Image " + str(path) + " saved || Time Elapsed: " + str(elapsed_time))

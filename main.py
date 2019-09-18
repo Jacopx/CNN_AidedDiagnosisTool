@@ -3,14 +3,11 @@
 # *            https://github.com/Jacopx/CNN_AidedDiagnosisTool             *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #                  usage: main.py [-h] [-v] dataset_folder                  *
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-import slide
 import os
 from os import path
-import cv2 as cv
-import utils
-import filter
+from src.preparation import filter, slide, utils
 import time
 import logger as log
 import arguments
@@ -54,7 +51,7 @@ def produce_filtered_slides():
             np_complemented_binary = filter.filter_np_threshold(np_grayscale_complemented)
             np_masked = filter.apply_mask(np_rgb, np_complemented_binary)
             image_rgb_masked = utils.np_to_pil(np_masked, utils.COLOR)
-            utils.save_image(image_rgb_masked, FILTER_FOLDER, filename+"_f")
+            utils.save_image(image_rgb_masked, FILTER_FOLDER, filename + "_f")
 
 
 def produce_otsu_slides():

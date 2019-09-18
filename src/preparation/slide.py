@@ -9,7 +9,7 @@ import openslide
 import time
 import math
 from threading import Thread
-import utils
+from src.preparation import utils
 import logger as log
 from os import path
 import numpy as np

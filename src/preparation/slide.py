@@ -13,6 +13,7 @@ from src.preparation import utils
 import logger as log
 from os import path
 import numpy as np
+from PIL import Image
 import cv2 as cv
 
 
@@ -78,7 +79,7 @@ def image_to_cv(image):
 def resize_image_r(image, scale_factor):
     start_time = time.time()
     width, height = image.size
-    image_r = image.resize((int(width / scale_factor), int(height / scale_factor)))
+    image_r = image.resize((int(width / scale_factor), int(height / scale_factor)), Image.LANCZOS)
     elapsed_time = time.time() - start_time
     log.print_debug("Image resized || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image_r
@@ -91,7 +92,7 @@ def resize_image_r(image, scale_factor):
 # Return : the resized image
 def resize_image_a(image, width, height):
     start_time = time.time()
-    image_r = image.resize((int(width), int(height)))
+    image_r = image.resize((int(width), int(height)), Image.LANCZOS)
     elapsed_time = time.time() - start_time
     log.print_debug("Image resized || Time Elapsed: " + str(elapsed_time))
     return image_r
@@ -225,13 +226,14 @@ def overlap_crop_singleprocess(dataset_folder, slide_name_ex, custom_ss):
 """
 
 
-# Crop an image and save the cropped frame
+# Crop an image, resize it to a square of 224 x 224 and save it
 # Parameters : image -> PIL.Image to be cropped
 #              box -> coordinates of crop region
 #              crop_name -> string defining path name for saving image
 def custom_crop(image, box, folder, crop_name):
     crop_region = image.crop(box)
-    utils.save_image(crop_region, folder, crop_name)
+    resized_crop = resize_image_a(crop_region,224,224)
+    utils.save_image(resized_crop, folder, crop_name)
     # crop_region.save(crop_name)
 
 

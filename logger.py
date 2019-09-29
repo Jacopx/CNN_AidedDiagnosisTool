@@ -18,8 +18,21 @@ def get_logger():
     global logger, verbose
     if verbose is not False:
         if logger is None:
-            coloredlogs.install(level="DEBUG")
-            logger = logging.getLogger()
+            #logging.basicConfig(level=logging.DEBUG)
+            logging.getLogger('PIL.PngImagePlugin').setLevel(logging.CRITICAL)
+            logger = logging.getLogger('CnnSoftware')
+            coloredlogs.install(level='DEBUG')
+
+            def print_debug(message):
+                global logger
+                get_logger()
+                if logger is not None:
+                    logger.debug(message)
+            """ #JUST FOR TEST
+            print_debug("message")
+            print_info("message")
+            print_error("message")
+            print_warning("message") """
     else:
         logger = None
 
@@ -43,3 +56,10 @@ def print_error(message):
     get_logger()
     if logger is not None:
         logger.error(message)
+
+
+def print_warning(message):
+    global logger
+    get_logger()
+    if logger is not None:
+        logger.warning(message)

@@ -9,7 +9,7 @@ import numpy as np
 import time
 import logger as log
 from os import path
-import skimage.filters as sk_filters
+#import skimage.filters as sk_filters
 import cv2 as cv
 
 FILTER_FOLDER = path.join("resources", "filtered")
@@ -20,7 +20,7 @@ def filter_np_rgb_to_grayscale(np_image):
     weights = np.array([0.2125, 0.7154, 0.0721])
     np_grayscale = np.dot(np_image, weights)
     elapsed_time = time.time() - start_time
-    log.print_debug("RGB converted to Gray scale || Shape: " + str(np_grayscale.shape) + "+ || Time Elapsed: " + str(elapsed_time))
+    #log.print_debug("RGB converted to Gray scale || Shape: " + str(np_grayscale.shape) + "+ || Time Elapsed: " + str(elapsed_time))
     return np_grayscale
 
 
@@ -49,13 +49,26 @@ def complement_np(np_image):
 
 
 def filter_np_threshold(np_image):
-    start_time = time.time()
     np_binary = np.copy(np_image)
     np_binary[np_binary > 142] = 255
     np_binary[np_binary <= 142] = 0
-    elapsed_time = time.time() - start_time
-    log.print_debug("Threshold applied || Shape: " + str(np_binary.shape) + "+ || Time Elapsed: " + str(elapsed_time))
     return np_binary
+
+
+def check_valid(np_image):
+    valid = True
+    start_time = time.time()
+    np_grayscale = filter_np_rgb_to_grayscale(np_image)
+    np_binary = np.copy(np_grayscale)
+    np_binary[np_binary > 230] = 255
+    np_binary[np_binary <= 230] = 0
+    black_px = sum(sum(i == 0 for i in np_binary))
+    white_px = sum(sum(i == 255 for i in np_binary))
+    if white_px/(white_px + black_px) > 0.7:
+        valid = False
+    elapsed_time = time.time() - start_time
+    #log.print_debug("Threshold applied || Shape: " + str(np_binary.shape) + "+ || Time Elapsed: " + str(elapsed_time))
+    return valid
 
 
 def apply_mask(np_rgb_image, np_mask):
@@ -68,7 +81,7 @@ def apply_mask(np_rgb_image, np_mask):
     log.print_debug("Mask applied || Time Elapsed: " + str(elapsed_time))
     return np_rgb_masked
 
-
+"""
 def otsu_filter(np_gs_image):
     start_time = time.time()
     otsu_thresh_value = sk_filters.threshold_otsu(np_gs_image)
@@ -87,7 +100,7 @@ def gaussian_filter(np_gs_image, s, t):
     elapsed_time = time.time() - start_time
     log.print_debug("Otsu filter scikit || Time Elapsed: " + str(elapsed_time))
     return np_gaussian
-
+"""
 
 def normalize_filter(np_image):
     start_time = time.time()

@@ -33,7 +33,7 @@ def min_max_ss():  # Get the greatest dimension of the dataset of training
             size_list.append(h_temp)
     return min(size_list)
 
-
+ 
 def produce_crops(ss):  # Produce the crop for the training
     # Production
     for filename in os.listdir(DATASET_FOLDER):

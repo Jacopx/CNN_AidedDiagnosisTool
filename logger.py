@@ -4,22 +4,27 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # *                 logger.py : tool for logging mechanism                  *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 import logging
+import absl.logging
+logging.root.removeHandler(absl.logging._absl_handler)
+absl.logging._warn_preinit_stderr = False
 import coloredlogs
 import arguments
-
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 logger = None
 verbose = arguments.get_verbose()
-
+#logging.getLogger('PIL.PngImagePlugin').setLevel(logging.CRITICAL)
+logging.getLogger('PIL.PngImagePlugin').disabled = True
+logging.getLogger('tensorflow').disabled = True
 
 def get_logger():
     global logger, verbose
     if verbose is not False:
         if logger is None:
             #logging.basicConfig(level=logging.DEBUG)
-            logging.getLogger('PIL.PngImagePlugin').setLevel(logging.CRITICAL)
+
             logger = logging.getLogger('CnnSoftware')
             coloredlogs.install(level='DEBUG')
 
@@ -63,3 +68,5 @@ def print_warning(message):
     get_logger()
     if logger is not None:
         logger.warning(message)
+
+

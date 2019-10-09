@@ -9,8 +9,9 @@ class ConvBlock2D(layers.Layer):
                  drop_rate,
                  strides=1,  # S
                  use_bias=False,
-                 separable_convolution=False
-                 ):
+                 separable_convolution=False,
+                 **kwargs):
+        super().__init__(**kwargs)
         self.kernel_size = kernel_size
         self.filters = filters
         self.drop_rate = drop_rate
@@ -18,7 +19,7 @@ class ConvBlock2D(layers.Layer):
         self.use_bias=use_bias
         self.separable_convolution = separable_convolution
 
-    def call(self, input_tensor):
+    def call(self, input_tensor, **kwargs):
         if not self.separable_convolution:
             x = layers.ZeroPadding2D(padding=1)(input_tensor)
             x = layers.Conv2D(filters=self.filters,
@@ -32,7 +33,7 @@ class ConvBlock2D(layers.Layer):
                               )(x)
             return layers.Dropout(rate=self.drop_rate)(x, training=True)
         else:
-            x = layers.Conv2D(filters=self.filters/2,
+            x = layers.Conv2D(filters=int(self.filters/2),
                               kernel_size=1,
                               strides=1,
                               padding='valid',
@@ -42,7 +43,7 @@ class ConvBlock2D(layers.Layer):
                               bias_initializer='zeros'
                               )(input_tensor)
             x = layers.Dropout(rate=self.drop_rate)(x, training=True)
-            x = layers.Conv2D(filters=self.filters/2,
+            x = layers.Conv2D(filters=int(self.filters/2),
                               kernel_size=self.kernel_size,
                               strides=1,
                               padding='valid',

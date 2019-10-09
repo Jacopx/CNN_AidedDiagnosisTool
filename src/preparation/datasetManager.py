@@ -33,7 +33,7 @@ def min_max_ss():  # Get the greatest dimension of the dataset of training
             size_list.append(h_temp)
     return min(size_list)
 
- 
+
 def produce_crops(ss):  # Produce the crop for the training
     # Production
     for filename in os.listdir(DATASET_FOLDER):
@@ -148,6 +148,8 @@ def dataset_split(x, y, p, test_factor = 0.5, random_state = None):
         in_train_patients = np.unique(np.asarray(dataset)[:after_different + 1, 2])
         in_test_patients = np.unique(np.asarray(dataset)[after_different + 1:, 2])
 
+    log.print_info(" Dataset shape : " + str(X_train.shape) + " " + str(y_train.shape) + str(X_test.shape) + " " + str(y_test.shape) )
+
     X_train, y_train = balance_set(X_train, y_train, in_train_patients)
     X_test, y_test = balance_set(X_test, y_test, in_test_patients)
 
@@ -160,6 +162,7 @@ def dataset_split(x, y, p, test_factor = 0.5, random_state = None):
 def balance_set(x, y, in_set_patients):
     log.print_debug("Balancing dataset")
     cropped_dataset_folder = path.join(CROP_FOLDER, str(1120))
+    x_list = x.tolist()
     unique, counts = np.unique(y, return_counts=True)
     max_class_size = max(counts)
     for i in range(0, unique.shape[0]):
@@ -179,7 +182,9 @@ def balance_set(x, y, in_set_patients):
                     img = Image.open(filename).convert('RGB')
                     img_array = np.asarray(img, np.uint8)
                     if filter.check_valid(img_array):
-                        x = np.append(x, img_array)
+                        # log.print_error(" X shape ----> " + str(len(x_list)))
+                        x_list.append(img_array)
+                        # log.print_error(" X shape ----> " + str(len(x_list)))
                         y = np.append(y, img_class)
                         images_to_add = images_to_add - 1
                         log.print_debug("Img " + filename + " added to set. " + str( images_to_add ) + " images to go.")
@@ -189,7 +194,7 @@ def balance_set(x, y, in_set_patients):
                 else:
                     log.print_warning("No more available images for class " + CATEGORIES[unique[i]])
                     break
-    return x, y
+    return np.asarray(x_list), y
 
 
 # If already exist, open pickles containing the whole dataset. Create dataset and save it in pickles, otherwise.
@@ -219,6 +224,8 @@ def open_dataset():
         pickle_out = open(p_path, "wb")
         pickle.dump(p, pickle_out)
         pickle_out.close()
+
+    log.print_info(" Dataset shape : " + str(len(X)) + " " + str(len(y)) + " " + str(len(p)))
 
     x_train_path = path.join(SET_FOLDER, str(RANDOM_STATE), "X_train.pickle")
     y_train_path = path.join(SET_FOLDER, str(RANDOM_STATE), "y_train.pickle")

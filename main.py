@@ -46,17 +46,18 @@ def main():
     start_time = time.time()
 
     X_train , y_train, X_test, y_test = dm.open_dataset()
-    log.print_info("TRAIN STATs")
+    #X_train, y_train, X_test, y_test = dm.open_dummy_dataset()
+    log.print_info(" TRAIN STATs")
     log.print_info(" Train set shape : " + str(X_train.shape) +" "+ str(y_train.shape))
     log.print_info(" Train set type : " + str(X_train.dtype))
     dm.print_stats(y_train)
-    log.print_info("TEST STATs")
+    log.print_info(" TEST STATs")
     log.print_info(" Test set shape : " + str(X_test.shape) +" "+ str(y_test.shape) )
     log.print_info(" Test set type : " + str(X_test.dtype))
     dm.print_stats(y_test)
     convNet.compile_model(X_train , y_train, X_test, y_test)
     elapsed_time = time.time() - start_time
-    log.print_debug("TOTAL TIME FOR PROCESSING: " + str(elapsed_time))
+    log.print_debug(" TOTAL TIME FOR PROCESSING: " + str(elapsed_time))
 
 if __name__ == "__main__":
     main()

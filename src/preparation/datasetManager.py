@@ -3,23 +3,13 @@ from os import path
 import glob
 import random
 from src.preparation import filter, slide, utils
-import time
 import logger as log
 import arguments
 from PIL import Image
 import numpy as np
-from sklearn.model_selection import train_test_split
 import pickle
 
-
-DATASET_FOLDER = arguments.get_dataset_folder()
-SAMPLE_SIZE = 1344
-TEST_SIZE = 0.25
-RANDOM_STATE = 10
-FILTER_FOLDER = path.join("resources", "filtered")
-CROP_FOLDER = path.join("resources", "cropped_dataset","overlap_no_padding")
-SET_FOLDER = path.join("resources", "cropped_dataset","dataset_train_test")
-CATEGORIES = ["AC","AD","H"]
+from src.parameters import *
 
 
 def min_max_ss():  # Get the greatest dimension of the dataset of training
@@ -59,18 +49,46 @@ def load_datasets(*sampSizes):
                 img = Image.open(img_path).convert('RGB')
                 img_array = np.asarray(img, np.uint8)
                 if filter.check_valid(img_array):
-                    x.append(img_array)
+                    to_append_img = np.asarray(img.resize((int(INPUT_SIZE), int(INPUT_SIZE)), Image.LANCZOS))
+                    x.append(to_append_img)
                     y.append(img_class)
                     p.append(img_patient)
                 else:
                     log.print_warning("Img "+filename+" not loaded: too much white")
             except Exception as e:
                 log.print_error("Cannot load image "+filename)
-    #x , y, p = balance_dataset(x, y, p)
-    #x_data = np.asarray(x)
-    #y_data = np.asarray(y)
-    #p_data = np.asarray(p)
-    #print_stats(y_data)
+    return x, y, p
+
+# Open n_samples of a cropped dataset
+# Parameters : sampSize -> size of samples, n_samples -> number of samples
+# Return : x -> dataset of samples, y -> related labels, p -> related patient
+def load_dummyset(sampSize, n_samples):
+    x = []
+    y = []
+    p = []
+
+    log.print_debug("Opening Cropped dataset " + str(sampSize))
+    cropped_dataset_folder = path.join(CROP_FOLDER,str(sampSize))
+    for filename in os.listdir(cropped_dataset_folder):
+        if n_samples > 0 :
+            try :
+                img_path = path.join(cropped_dataset_folder, filename)
+                img_patient = filename.split("_")[0]
+                img_class = CATEGORIES.index(str(filename.split("_")[1]))
+                img = Image.open(img_path).convert('RGB')
+                img_array = np.asarray(img, np.uint8)
+                if filter.check_valid(img_array):
+                    to_append_img = np.asarray(img.resize((int(INPUT_SIZE), int(INPUT_SIZE)), Image.LANCZOS))
+                    x.append(to_append_img, np.uint8)
+                    y.append(img_class)
+                    p.append(img_patient)
+                    n_samples = n_samples - 1
+                else:
+                    log.print_warning("Img "+filename+" not loaded: too much white")
+            except Exception as e:
+                log.print_error("Cannot load image "+filename)
+        else :
+            break
     return x, y, p
 
 
@@ -125,8 +143,7 @@ def dataset_split(x, y, p, test_factor = 0.5, random_state = None):
     random.seed(random_state)
     r = {p_e: random.random() for x_e, y_e, p_e in dataset}
     dataset.sort(key=lambda item: r[item[2]])
-    train_size = int(len(dataset) - (len(dataset) * test_factor))
-
+    train_size = int(len(dataset) - int(len(dataset) * test_factor))
     before_different = train_size - 2
     after_different = train_size
     while dataset[before_different][2] == dataset[train_size - 1][2] :
@@ -152,7 +169,6 @@ def dataset_split(x, y, p, test_factor = 0.5, random_state = None):
 
     X_train, y_train = balance_set(X_train, y_train, in_train_patients)
     X_test, y_test = balance_set(X_test, y_test, in_test_patients)
-
     return X_train, X_test, y_train, y_test
 
 
@@ -182,12 +198,11 @@ def balance_set(x, y, in_set_patients):
                     img = Image.open(filename).convert('RGB')
                     img_array = np.asarray(img, np.uint8)
                     if filter.check_valid(img_array):
-                        # log.print_error(" X shape ----> " + str(len(x_list)))
-                        x_list.append(img_array)
-                        # log.print_error(" X shape ----> " + str(len(x_list)))
+                        to_append_img = np.asarray(img.resize((int(INPUT_SIZE), int(INPUT_SIZE)), Image.LANCZOS))
+                        x_list.append(to_append_img)
                         y = np.append(y, img_class)
                         images_to_add = images_to_add - 1
-                        log.print_debug("Img " + filename + " added to set. " + str( images_to_add ) + " images to go.")
+                        #log.print_debug("Img " + filename + " added to set. " + str( images_to_add ) + " images to go.")
                     else:
                         log.print_warning("Img " + filename + " not loaded: too much white")
                         continue
@@ -204,8 +219,11 @@ def open_dataset():
     y_path = path.join(SET_FOLDER, "y.pickle")
     p_path = path.join(SET_FOLDER, "p.pickle")
 
+    if not os.path.isdir(SET_FOLDER):
+        os.makedirs(SET_FOLDER)
+
     if os.path.isfile(x_path) and os.path.isfile(y_path) and os.path.isfile(p_path):
-        log.print_debug("Opening saved sets")
+        log.print_debug("Opening saved sets in "+str(SET_FOLDER))
         pickle_in = open(x_path, "rb")
         X = pickle.load(pickle_in)
         pickle_in = open(y_path, "rb")
@@ -214,7 +232,7 @@ def open_dataset():
         p = pickle.load(pickle_in)
     else:
         X, y, p = load_datasets(1344, 2240, 3136)
-        log.print_debug("Saving and opening sets")
+        log.print_debug("Saving and opening sets in "+str(SET_FOLDER))
         pickle_out = open(x_path, "wb")
         pickle.dump(X, pickle_out)
         pickle_out.close()
@@ -227,10 +245,77 @@ def open_dataset():
 
     log.print_info(" Dataset shape : " + str(len(X)) + " " + str(len(y)) + " " + str(len(p)))
 
+    if not os.path.isdir(path.join(SET_FOLDER, str(RANDOM_STATE))):
+        os.makedirs(path.join(SET_FOLDER, str(RANDOM_STATE)))
     x_train_path = path.join(SET_FOLDER, str(RANDOM_STATE), "X_train.pickle")
     y_train_path = path.join(SET_FOLDER, str(RANDOM_STATE), "y_train.pickle")
     x_test_path = path.join(SET_FOLDER, str(RANDOM_STATE), "X_test.pickle")
     y_test_path = path.join(SET_FOLDER, str(RANDOM_STATE), "y_test.pickle")
+    if os.path.isfile(x_train_path) and os.path.isfile(y_train_path) and os.path.isfile(x_test_path) and os.path.isfile(
+            y_test_path):
+        pickle_in = open(x_train_path, "rb")
+        X_train = pickle.load(pickle_in)
+        pickle_in = open(y_train_path, "rb")
+        y_train = pickle.load(pickle_in)
+        pickle_in = open(x_test_path, "rb")
+        X_test = pickle.load(pickle_in)
+        pickle_in = open(y_test_path, "rb")
+        y_test = pickle.load(pickle_in)
+    else:
+        X_train, X_test, y_train, y_test = dataset_split(X, y, p, test_factor=TEST_SIZE, random_state=RANDOM_STATE)
+        pickle_out = open(x_train_path, "wb")
+        pickle.dump(X_train, pickle_out)
+        pickle_out.close()
+        pickle_out = open(y_train_path, "wb")
+        pickle.dump(y_train, pickle_out)
+        pickle_out.close()
+        pickle_out = open(x_test_path, "wb")
+        pickle.dump(X_test, pickle_out)
+        pickle_out.close()
+        pickle_out = open(y_test_path, "wb")
+        pickle.dump(y_test, pickle_out)
+        pickle_out.close()
+
+    return X_train , y_train, X_test, y_test
+
+
+def open_dummy_dataset():
+    x_path = path.join(DUMMY_SET_FOLDER, "X.pickle")
+    y_path = path.join(DUMMY_SET_FOLDER, "y.pickle")
+    p_path = path.join(DUMMY_SET_FOLDER, "p.pickle")
+
+    if not os.path.isdir(DUMMY_SET_FOLDER):
+        os.makedirs(DUMMY_SET_FOLDER)
+
+    if os.path.isfile(x_path) and os.path.isfile(y_path) and os.path.isfile(p_path):
+        log.print_debug("Opening saved dummy sets")
+        pickle_in = open(x_path, "rb")
+        X = pickle.load(pickle_in)
+        pickle_in = open(y_path, "rb")
+        y = pickle.load(pickle_in)
+        pickle_in = open(p_path, "rb")
+        p = pickle.load(pickle_in)
+    else:
+        X, y, p = load_dummyset(3136, 1000)
+        log.print_debug("Saving and opening dummy sets")
+        pickle_out = open(x_path, "wb")
+        pickle.dump(X, pickle_out)
+        pickle_out.close()
+        pickle_out = open(y_path, "wb")
+        pickle.dump(y, pickle_out)
+        pickle_out.close()
+        pickle_out = open(p_path, "wb")
+        pickle.dump(p, pickle_out)
+        pickle_out.close()
+
+    log.print_info(" Dummyset shape : " + str(len(X)) + " " + str(len(y)) + " " + str(len(p)))
+
+    if not os.path.isdir(path.join(DUMMY_SET_FOLDER, str(RANDOM_STATE))):
+        os.makedirs(path.join(DUMMY_SET_FOLDER, str(RANDOM_STATE)))
+    x_train_path = path.join(DUMMY_SET_FOLDER, str(RANDOM_STATE), "X_train.pickle")
+    y_train_path = path.join(DUMMY_SET_FOLDER, str(RANDOM_STATE), "y_train.pickle")
+    x_test_path = path.join(DUMMY_SET_FOLDER, str(RANDOM_STATE), "X_test.pickle")
+    y_test_path = path.join(DUMMY_SET_FOLDER, str(RANDOM_STATE), "y_test.pickle")
     if os.path.isfile(x_train_path) and os.path.isfile(y_train_path) and os.path.isfile(x_test_path) and os.path.isfile(
             y_test_path):
         pickle_in = open(x_train_path, "rb")

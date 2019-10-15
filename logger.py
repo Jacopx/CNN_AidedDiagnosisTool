@@ -17,6 +17,8 @@ logger = None
 verbose = arguments.get_verbose()
 #logging.getLogger('PIL.PngImagePlugin').setLevel(logging.CRITICAL)
 logging.getLogger('PIL.PngImagePlugin').disabled = True
+logging.getLogger('matplotlib.axes._base').disabled = True
+logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('tensorflow').disabled = True
 
 def get_logger():
@@ -26,7 +28,7 @@ def get_logger():
             #logging.basicConfig(level=logging.DEBUG)
 
             logger = logging.getLogger('CnnSoftware')
-            coloredlogs.install(level='DEBUG')
+            coloredlogs.install(level='INFO')
 
             def print_debug(message):
                 global logger

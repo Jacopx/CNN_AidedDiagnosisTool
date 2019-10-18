@@ -8,7 +8,7 @@ TEST_SIZE = 0.25
 RANDOM_STATE = 10
 CATEGORIES = ["AC","AD","H"]
 
-DATASET_FOLDER = arguments.get_dataset_folder()
+DATASET_FOLDER = path.join("resources", "DATASET_ROI")
 FILTER_FOLDER = path.join("resources", "filtered")
 CROP_FOLDER = path.join("resources", "cropped_dataset","overlap_no_padding")
 SET_FOLDER = path.join("resources", "cropped_dataset","dataset_train_test",str(INPUT_SIZE))

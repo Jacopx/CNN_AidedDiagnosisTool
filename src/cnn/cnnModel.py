@@ -26,10 +26,6 @@ class CnnModel:
         self.drop_rate = drop_rate
         self.use_bias=use_bias
         self.dense_size=dense_size
-        if logdir is None:
-            self.logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
-        else:
-            self.logdir = os.path.join("logs", logdir)
         self.separable_convolution = separable_convolution
         self._build_model()
 

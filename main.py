@@ -4,6 +4,8 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #            usage: main.py [-h] [-v] dataset_folder sample_size            *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+import sys
+sys.path.append("..")
 import logger as log
 import time
 import src.cnn.testCNN as convNet
@@ -58,6 +60,7 @@ def main():
     convNet.compile_model(X_train , y_train, X_test, y_test)
     elapsed_time = time.time() - start_time
     log.print_debug(" TOTAL TIME FOR PROCESSING: " + str(elapsed_time))
+    return 0
 
 if __name__ == "__main__":
     main()

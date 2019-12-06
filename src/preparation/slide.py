@@ -15,6 +15,7 @@ from os import path
 import numpy as np
 from PIL import Image
 import cv2 as cv
+from src.parameters import *
 
 
 LVL = 0  # Level of dimensionality
@@ -42,6 +43,15 @@ def open_slide(slide_path):
             "Opened slide " + slide_path + " || Shape: " + str(get_slide_size(slide)) + " || Time Elapsed: " + str(
                 elapsed_time))
     return slide
+
+
+def read_slide_crop(slide,x,y):
+    start_time = time.time()
+    log.print_debug("Converting slide to image. Requires time!")
+    image = slide.read_region((x, y), LVL, (CROP_SIZE, CROP_SIZE))
+    elapsed_time = time.time() - start_time
+    log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
+    return image
 
 
 # Convert a svs slide into a PIL.Image

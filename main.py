@@ -8,8 +8,11 @@ import sys
 sys.path.append("..")
 import logger as log
 import time
+import src.preparation.slide as slide
+import src.preparation.utils as utils
 import src.cnn.testCNN as convNet
 from src.preparation import datasetManager as dm
+from src.parameters import *
 
 """
 def produce_otsu_slides():
@@ -46,7 +49,18 @@ def produce_otsu_slides():
 
 def main():
     start_time = time.time()
+    image, prediction_matrix, valid_bit_matrix = dm.get_prediction_matrix_multithread_test("map_2.svs")
+    log.print_info('Prediction done')
+    prediction_mask = utils.get_prediction_mask(prediction_matrix, valid_bit_matrix)
+    prediction_mask_img = utils.np_to_pil(prediction_mask, utils.COLOR_ALPHA)
+    print(prediction_mask_img.size)
+    print(image.size)
+    utils.save_image(prediction_mask_img, RESOURCE_FOLDER, "test_mask_2_2")
+    utils.save_image(image, RESOURCE_FOLDER, "test_img_2_2")
+    blended_image = utils.blend(image, prediction_mask_img)
+    utils.save_image(utils.np_to_pil(blended_image, utils.COLOR_ALPHA), RESOURCE_FOLDER, "test_blend_2_2")
 
+    """
     X_train , y_train, X_test, y_test = dm.open_dataset()
     #X_train, y_train, X_test, y_test = dm.open_dummy_dataset()
     log.print_info(" TRAIN STATs")
@@ -57,7 +71,7 @@ def main():
     log.print_info(" Test set shape : " + str(X_test.shape) +" "+ str(y_test.shape) )
     log.print_info(" Test set type : " + str(X_test.dtype))
     dm.print_stats(y_test)
-    convNet.compile_model(X_train , y_train, X_test, y_test)
+    convNet.compile_model(X_train , y_train, X_test, y_test)"""
     elapsed_time = time.time() - start_time
     log.print_debug(" TOTAL TIME FOR PROCESSING: " + str(elapsed_time))
     return 0

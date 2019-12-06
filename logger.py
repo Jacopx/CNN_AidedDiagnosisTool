@@ -28,7 +28,7 @@ def get_logger():
             #logging.basicConfig(level=logging.DEBUG)
 
             logger = logging.getLogger('CnnSoftware')
-            coloredlogs.install(level='INFO')
+            coloredlogs.install(level='debug')
 
             def print_debug(message):
                 global logger

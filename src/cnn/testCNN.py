@@ -1,8 +1,9 @@
 import logger as log
 from tensorflow.keras import layers
 from tensorflow.keras import models
-import tensorflow as tf
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+import tensorflow as tf
 from src.cnn.convBlock2D import ConvBlock2D
 import matplotlib.pyplot as plt
 from contextlib import redirect_stdout
@@ -442,13 +443,13 @@ def separated_3l_convolution_net(inputs):
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x)
+    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
     x = layers.Dense(DENSE_SIZE,
                            activation        = 'relu',
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x)
+    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
     output = layers.Dense(N_CLASSES,
                            activation        = 'softmax',
                            use_bias          = USE_BIAS,
@@ -514,13 +515,13 @@ def separated_2l_convolution_net(inputs):
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x)
+    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
     x = layers.Dense(DENSE_SIZE,
                            activation        = 'relu',
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x)
+    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
     output = layers.Dense(N_CLASSES,
                            activation        = 'softmax',
                            use_bias          = USE_BIAS,
@@ -530,6 +531,7 @@ def separated_2l_convolution_net(inputs):
 
 
 def normal_convolution_net(inputs):
+    x = layers.BatchNormalization
     # 3 * 3 * 64 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(inputs)
     x = layers.Conv2D(filters=64, kernel_size=3, strides=1, padding='valid', activation='relu',
@@ -612,13 +614,13 @@ def normal_convolution_net(inputs):
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x)
+    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
     x = layers.Dense(DENSE_SIZE,
                            activation        = 'relu',
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x)
+    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
     output = layers.Dense(N_CLASSES,
                            activation        = 'softmax',
                            use_bias          = USE_BIAS,
@@ -706,13 +708,21 @@ def bayesian_cnn(inputs):
 
 
 def compile_model(x_train, y_train, x_test, y_test):
+
+    if tf.test.is_built_with_cuda:
+        if tf.test.is_gpu_available(cuda_only=False, min_cuda_compute_capability=None):
+            log.print_error("MAYBE GPU IS USED")
+        else:
+            log.print_warning("NO GPU IS USED")
+    else:
+        log.print_warning("THIS VERSION OF TENSORFLOW DOES NOT USES CUDA")
     input_tensor = tf.keras.Input(shape=x_train[0].shape)
     bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs = input_tensor))
     opt = tf.keras.optimizers.Adam(lr = LEARNING_RATE, decay = DECAY)
     bayesian_model.compile(loss = 'sparse_categorical_crossentropy', optimizer = opt, metrics = ['accuracy'])
     model_name = str(x_train[0].shape[0]) + "_" + str(N_EPOCH) + "_" + str(BATCH_SIZE) + "_" + str(LEARNING_RATE) \
                  + "_" + str(DECAY) + "_" + str(DROP_RATE) + "_" + str(USE_BIAS) + "_" + str(DENSE_SIZE) + "_" \
-                 + str(SEPARABLE_CONVOLUTION)
+                 + str(SEPARABLE_CONVOLUTION) + "_local"
     bayesian_model.summary()
     # Save model skeleton
     if not os.path.isdir(SUMMARY_FOLDER):
@@ -739,7 +749,7 @@ def compile_model(x_train, y_train, x_test, y_test):
     log.print_info('Test loss : ' + str(scores[0]))
     log.print_info('Test accuracy : ' + str(scores[1]))
 
-    loss = bayesian_train.history['loss']
+    """loss = bayesian_train.history['loss']
     val_loss = bayesian_train.history['val_loss']
     epochs = range(N_EPOCH)
     plt.figure()
@@ -747,4 +757,57 @@ def compile_model(x_train, y_train, x_test, y_test):
     plt.plot(epochs, val_loss, 'b', label='Validation loss')
     plt.title('Training and validation loss')
     plt.legend()
-    plt.show()
+    plt.show()"""
+
+
+def predict_from_model(batch_to_predict):
+    model_name = "224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5"
+    model_path = os.path.join(MODEL_FOLDER, model_name)
+    input_tensor = tf.keras.Input(shape=(224, 224, 3))
+    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor))
+    bayesian_model.load_weights(model_path, by_name=False)
+    log.print_info('Model loaded')
+    print(str(batch_to_predict.shape))
+    #return bayesian_model.predict(batch_to_predict, batch_to_predict.shape[0]);
+    prediction_list = []
+    i = 0
+    j = 0
+    k = 0
+    div = min(batch_to_predict.shape[0],40)
+    for i in range(0, batch_to_predict.shape[0]):
+        prediction_list.append(bayesian_model.predict(batch_to_predict[i:i+1], 1))
+        temp = int(batch_to_predict.shape[0]/div)
+        if (i % temp) == 0:
+            print("", end="\r")
+            print("Prediction status: ", end = '')
+            for j in range (0,int(i*div/batch_to_predict.shape[0])):
+                print("#", end = '')
+            for k in range(j, div):
+                print("=", end = '')
+            perc = int(i * 100 / batch_to_predict.shape[0])
+            print(" "+str(perc)+" %", end = '')
+    print("", end="\r")
+    print("Prediction status: ", end='')
+    for k in range(0, div):
+        print("#", end='')
+    print(" 100%")
+    return prediction_list
+
+
+def load_model(model_name):
+    model_path = os.path.join(MODEL_FOLDER, model_name)
+    input_tensor = tf.keras.Input(shape=(224, 224, 3))
+    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor))
+    bayesian_model.load_weights(model_path, by_name=False)
+    return bayesian_model
+
+
+def predict_from_model_multithread(batch_to_predict, prediction_list, i):
+    bayesian_model = load_model("224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5")
+    predictions = bayesian_model.predict(batch_to_predict, batch_size=BATCH_SIZE, verbose=1, workers=10, use_multiprocessing=True)
+    prediction_list[i]=predictions
+
+def predict_from_model_multithread_temp(batch_to_predict):
+    bayesian_model = load_model("224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5")
+    predictions = bayesian_model.predict(batch_to_predict, batch_size=BATCH_SIZE, verbose=1, workers=10, use_multiprocessing=True)
+    return predictions

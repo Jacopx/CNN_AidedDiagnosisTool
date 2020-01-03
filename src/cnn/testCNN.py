@@ -1,6 +1,6 @@
 import logger as log
-from keras import layers
-from keras import models
+from tensorflow.keras import layers
+from tensorflow.keras import models
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import tensorflow as tf

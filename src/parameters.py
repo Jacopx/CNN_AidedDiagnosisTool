@@ -7,7 +7,7 @@ INPUT_SIZE = 64
 TEST_SIZE = 0.25
 RANDOM_STATE = 10
 CATEGORIES = ["AC","AD","H"]
-CROP_SIZE = 4480
+CROP_SIZE = 1120
 
 
 DATASET_FOLDER = path.join("resources", "DATASET_ROI")
@@ -19,6 +19,7 @@ SET_FOLDER = path.join("resources", "cropped_dataset","dataset_train_test",str(I
 DUMMY_SET_FOLDER = path.join("resources", "cropped_dataset","dummyset_train_test",str(INPUT_SIZE))
 MODEL_FOLDER = path.join("resources", "models")
 SUMMARY_FOLDER = path.join("resources", "models","summary")
+PREDICTION_FOLDER = path.join("resources", "predictions")
 
 N_CLASSES = 3
 N_EPOCH = 10
@@ -31,4 +32,5 @@ DENSE_SIZE = 2048
 SEPARABLE_CONVOLUTION = False
 
 ###############################################################
+
 

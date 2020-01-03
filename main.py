@@ -8,9 +8,6 @@ import sys
 sys.path.append("..")
 import logger as log
 import time
-import src.preparation.slide as slide
-import src.preparation.utils as utils
-import src.cnn.testCNN as convNet
 from src.preparation import datasetManager as dm
 from src.parameters import *
 
@@ -49,6 +46,8 @@ def produce_otsu_slides():
 
 def main():
     start_time = time.time()
+    """
+    Test 1
     image, prediction_matrix, valid_bit_matrix = dm.get_prediction_matrix_multithread_test("map_2.svs")
     log.print_info('Prediction done')
     prediction_mask = utils.get_prediction_mask(prediction_matrix, valid_bit_matrix)
@@ -59,7 +58,14 @@ def main():
     utils.save_image(image, RESOURCE_FOLDER, "test_img_2_2")
     blended_image = utils.blend(image, prediction_mask_img)
     utils.save_image(utils.np_to_pil(blended_image, utils.COLOR_ALPHA), RESOURCE_FOLDER, "test_blend_2_2")
+    """
+    """#TEST 2
+    blended_np = dm.get_prediction_matrix_multithread_test2("map_2.svs")
+    log.print_info('Prediction done')
 
+    utils.save_image(utils.np_to_pil(blended_np, utils.COLOR), RESOURCE_FOLDER, "test_blend_1")"""
+    """# TEST 3
+    utils.save_image(dm.get_prediction_matrix_multithread_test2("map_4.svs"), RESOURCE_FOLDER, "test_blend_4_1120_2")"""
     """
     X_train , y_train, X_test, y_test = dm.open_dataset()
     #X_train, y_train, X_test, y_test = dm.open_dummy_dataset()
@@ -72,9 +78,11 @@ def main():
     log.print_info(" Test set type : " + str(X_test.dtype))
     dm.print_stats(y_test)
     convNet.compile_model(X_train , y_train, X_test, y_test)"""
+    mc_predictions, valid_bit_np = dm.mc_predict(10,"map_4.svs")
+    dm.save_blob(mc_predictions,"map_4_"+str(CROP_SIZE)+".pred",PREDICTION_FOLDER)
+    dm.save_blob(valid_bit_np, "map_4_"+str(CROP_SIZE)+".vbit", PREDICTION_FOLDER)
     elapsed_time = time.time() - start_time
     log.print_debug(" TOTAL TIME FOR PROCESSING: " + str(elapsed_time))
     return 0
-
 if __name__ == "__main__":
     main()

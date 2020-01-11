@@ -19,7 +19,6 @@ from src.parameters import *
 
 
 LVL = 0  # Level of dimensionality
-CROP_FOLDER = path.join("resources", "cropped_dataset")
 SCALE_FACTOR = 24
 
 
@@ -47,7 +46,7 @@ def open_slide(slide_path):
 
 def read_slide_crop(slide,x,y):
     start_time = time.time()
-    log.print_debug("Converting slide to image. Requires time!")
+    #log.print_debug("Converting slide to image. Requires time!")
     image = slide.read_region((x, y), LVL, (CROP_SIZE, CROP_SIZE))
     elapsed_time = time.time() - start_time
     log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
@@ -59,7 +58,7 @@ def read_slide_crop(slide,x,y):
 # Return : the converted image
 def slide_to_image(slide):
     start_time = time.time()
-    log.print_debug("Converting slide to image. Requires time!")
+    #log.print_debug("Converting slide to image. Requires time!")
     width, height = get_slide_size(slide)
     # MAX width*height = 2**29!!!!!!! IMPORTANT
     image = slide.read_region((0, 0), LVL, (width, height))

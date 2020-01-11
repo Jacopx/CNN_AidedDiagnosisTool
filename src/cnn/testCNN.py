@@ -106,6 +106,7 @@ def normal_convolution_net(inputs):
                            bias_initializer  = 'zeros')(x)
     return output
 
+
 def bayesian_cnn(inputs):
     return normal_convolution_net(inputs)
 
@@ -125,7 +126,7 @@ def compile_model(x_train, y_train, x_test, y_test):
     bayesian_model.compile(loss = 'sparse_categorical_crossentropy', optimizer = opt, metrics = ['accuracy'])
     model_name = str(x_train[0].shape[0]) + "_" + str(N_EPOCH) + "_" + str(BATCH_SIZE) + "_" + str(LEARNING_RATE) \
                  + "_" + str(DECAY) + "_" + str(DROP_RATE) + "_" + str(USE_BIAS) + "_" + str(DENSE_SIZE) + "_" \
-                 + str(SEPARABLE_CONVOLUTION) + "_local"
+                 + str(SEPARABLE_CONVOLUTION) + "_local.h5"
     bayesian_model.summary()
     # Save model skeleton
     if not os.path.isdir(SUMMARY_FOLDER):
@@ -164,7 +165,7 @@ def compile_model(x_train, y_train, x_test, y_test):
 
 
 def predict_from_model(batch_to_predict):
-    model_name = "224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5"
+    model_name = "224_10_32_0.0001_1e-06_0.1_True_2048_False_local.h5"
     model_path = os.path.join(MODEL_FOLDER, model_name)
     input_tensor = tf.keras.Input(shape=(224, 224, 3))
     bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor))
@@ -202,15 +203,11 @@ def load_model(model_name):
     input_tensor = tf.keras.Input(shape=(224, 224, 3))
     bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor))
     bayesian_model.load_weights(model_path, by_name=False)
+    log.print_info("Loaded model "+model_name)
     return bayesian_model
 
 
-def predict_from_model_multithread(batch_to_predict, prediction_list, i):
-    bayesian_model = load_model("224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5")
-    predictions = bayesian_model.predict(batch_to_predict, batch_size=BATCH_SIZE, verbose=1, workers=10, use_multiprocessing=True)
-    prediction_list[i]=predictions
-
-def predict_from_model_multithread_temp(batch_to_predict):
-    bayesian_model = load_model("224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5")
+def predict_from_model_multithread(batch_to_predict, drop_rate):
+    bayesian_model = load_model("224_10_32_0.0001_1e-06_"+str(drop_rate)+"_True_2048_False_local.h5")
     predictions = bayesian_model.predict(batch_to_predict, batch_size=BATCH_SIZE, verbose=1, workers=100, use_multiprocessing=True)
     return predictions

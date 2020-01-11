@@ -9,8 +9,8 @@ import pickle
 from src.cnn import testCNN as cnn
 from threading import Thread
 from math import ceil
-
 from src.parameters import *
+import gc
 
 
 def min_max_ss():  # Get the greatest dimension of the dataset of training
@@ -248,199 +248,7 @@ def open_dataset():
     return X_train , y_train, X_test, y_test
 
 
-def custom_crop(slide_, y, batch_to_predict, valid_bit_matrix, x_max):
-    batch_to_predict[y] = []
-    valid_bit_matrix[y] = []
-    for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, y * CROP_SIZE).convert('RGB')
-        resized_crop = slide.resize_image_a(image_crop, 224, 224)
-        resized_crop_np = np.asarray(resized_crop, np.float32)
-        if filter.check_valid(resized_crop_np):
-            valid_bit_matrix[y].append(1)
-        else:
-            valid_bit_matrix[y].append(0)
-        batch_to_predict[y].append(resized_crop_np)
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, y * CROP_SIZE).convert('RGB')
-    resized_crop = slide.resize_image_a(image_crop, 224, 224)
-    resized_crop_np = np.asarray(resized_crop, np.float32)
-    if filter.check_valid(resized_crop_np):
-        valid_bit_matrix[y].append(1)
-    else:
-        valid_bit_matrix[y].append(0)
-    batch_to_predict[y].append(resized_crop_np)
-
-
-def custom_crop_last(slide_, y, batch_to_predict, valid_bit_matrix, x_max):
-    batch_to_predict[y] = []
-    valid_bit_matrix[y] = []
-    for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, slide.get_slide_size(slide_)[1] * CROP_SIZE).convert('RGB')
-        resized_crop = slide.resize_image_a(image_crop, 224, 224)
-        resized_crop_np = np.asarray(resized_crop, np.float32)
-        if filter.check_valid(resized_crop_np):
-            valid_bit_matrix[y].append(1)
-        else:
-            valid_bit_matrix[y].append(0)
-        batch_to_predict[y].append(resized_crop_np)
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, slide.get_slide_size(slide_)[1] * CROP_SIZE).convert('RGB')
-    resized_crop = slide.resize_image_a(image_crop, 224, 224)
-    resized_crop_np = np.asarray(resized_crop, np.float32)
-    if filter.check_valid(resized_crop_np):
-        valid_bit_matrix[y].append(1)
-    else:
-        valid_bit_matrix[y].append(0)
-    batch_to_predict[y].append(resized_crop_np)
-
-
-def make_prediction_thread(batch_to_predict_np,prediction_list):
-    prediction_list = cnn.predict_from_model(batch_to_predict_np)
-
-
-def get_prediction_matrix_multithread(slidename):
-    slide_ = slide.open_slide(os.path.join(MAP_FOLDER, slidename))
-    slide_size = slide.get_slide_size(slide_)
-    log.print_info("Slide size : " + str(slide_size))
-
-    pool = []
-
-    x_max = ceil(slide_size[0] / CROP_SIZE)
-    y_max = ceil(slide_size[1] / CROP_SIZE)
-
-    log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
-    batch_to_predict = [None] * y_max
-    valid_bit_matrix = [None] * y_max
-    for y in range(0, y_max-1):
-        pool.append(Thread(target=custom_crop, args=(slide_, y, batch_to_predict, valid_bit_matrix, x_max)))
-        pool[-1].start()
-    t = Thread(target=custom_crop_last, args=(slide_, y_max - 1, batch_to_predict, valid_bit_matrix, x_max))
-    t.start()
-    for p in pool:
-        p.join()
-    t.join()
-
-    batch_to_predict_np = np.asarray(batch_to_predict)
-    print(batch_to_predict_np.shape)
-    prediction_list = [[]] * batch_to_predict_np.shape[0]
-    for i in range(0, batch_to_predict_np.shape[0]):
-       cnn.predict_from_model_multithread(batch_to_predict_np[i][:][:][:], prediction_list, i)
-    prediction_matrix = np.asarray(prediction_list)
-    print(prediction_matrix.shape)
-    return utils.list_np_to_pil(batch_to_predict_np,utils.COLOR), prediction_matrix, valid_bit_matrix
-
-    """prediction_list = []
-    model = cnn.load_model("224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5")
-    for i in range(0,batch_to_predict_np.shape[0]):
-        prediction_list.append(cnn.predict_from_model(model, batch_to_predict_np[i][:][:][:]))
-
-    prediction_matrix = np.reshape(np.asarray(prediction_list), (y_max, x_max, 3))
-    print(prediction_matrix.shape)
-    return prediction_matrix
-    """
-    """pool2 = []
-    prediction_list = [[]] * batch_to_predict_np.shape[0]
-    for i in range(0,batch_to_predict_np.shape[0]):
-        pool2.append(Thread(target=cnn.predict_from_model_multithread, args=(batch_to_predict_np[i][:][:][:], prediction_list[i])))
-        pool2[-1].start()
-    for p in pool2:
-        p.join()
-    prediction_matrix = np.asarray(prediction_list)
-    print(prediction_matrix.shape)
-    return prediction_matrix"""
-
-
-def custom_crop_test(slide_, y, batch_to_predict, valid_bit_matrix, x_max):
-    valid_bit_matrix[y] = []
-    for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, y * CROP_SIZE).convert('RGB')
-        resized_crop = slide.resize_image_a(image_crop, 224, 224)
-        resized_crop_np = np.asarray(resized_crop, np.float32)
-        if filter.check_valid(resized_crop_np):
-            valid_bit_matrix[y].append(1)
-        else:
-            valid_bit_matrix[y].append(0)
-        batch_to_predict[y*x_max+x] = resized_crop_np
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, y * CROP_SIZE).convert('RGB')
-    resized_crop = slide.resize_image_a(image_crop, 224, 224)
-    resized_crop_np = np.asarray(resized_crop, np.float32)
-    if filter.check_valid(resized_crop_np):
-        valid_bit_matrix[y].append(1)
-    else:
-        valid_bit_matrix[y].append(0)
-    batch_to_predict[y*x_max+x_max-1] = resized_crop_np
-
-
-def custom_crop_last_test(slide_, y, batch_to_predict, valid_bit_matrix, x_max):
-    batch_to_predict[y] = []
-    valid_bit_matrix[y] = []
-    for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, slide.get_slide_size(slide_)[1] * CROP_SIZE).convert('RGB')
-        resized_crop = slide.resize_image_a(image_crop, 224, 224)
-        resized_crop_np = np.asarray(resized_crop, np.float32)
-        if filter.check_valid(resized_crop_np):
-            valid_bit_matrix[y].append(1)
-        else:
-            valid_bit_matrix[y].append(0)
-        batch_to_predict[y*x_max+x] = resized_crop_np
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, slide.get_slide_size(slide_)[1] * CROP_SIZE).convert('RGB')
-    resized_crop = slide.resize_image_a(image_crop, 224, 224)
-    resized_crop_np = np.asarray(resized_crop, np.float32)
-    if filter.check_valid(resized_crop_np):
-        valid_bit_matrix[y].append(1)
-    else:
-        valid_bit_matrix[y].append(0)
-    batch_to_predict[y*x_max+x_max-1] = resized_crop_np
-
-
-def get_prediction_matrix_multithread_test(slidename):
-    slide_ = slide.open_slide(os.path.join(MAP_FOLDER, slidename))
-    slide_size = slide.get_slide_size(slide_)
-    log.print_info("Slide size : " + str(slide_size))
-
-    pool = []
-
-    x_max = ceil(slide_size[0] / CROP_SIZE)
-    y_max = ceil(slide_size[1] / CROP_SIZE)
-
-    log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
-    batch_to_predict = [None] * x_max * y_max
-    valid_bit_matrix = [None] * y_max
-    for y in range(0, y_max-1):
-        pool.append(Thread(target=custom_crop_test, args=(slide_, y, batch_to_predict, valid_bit_matrix, x_max)))
-        pool[-1].start()
-    t = Thread(target=custom_crop_last_test, args=(slide_, y_max - 1, batch_to_predict, valid_bit_matrix, x_max))
-    t.start()
-    for p in pool:
-        p.join()
-    t.join()
-
-    batch_to_predict_np = np.asarray(batch_to_predict)
-    print(batch_to_predict_np.shape)
-    prediction_list = cnn.predict_from_model_multithread_temp(batch_to_predict_np)
-    prediction_matrix = np.asarray(prediction_list)
-    print(prediction_matrix.shape)
-    return utils.list_np_to_pil_test(batch_to_predict_np,utils.COLOR, x_max, y_max).convert('RGBA'), np.reshape(prediction_matrix,(y_max,x_max,3)), valid_bit_matrix
-    """prediction_list = []
-    model = cnn.load_model("224_10_32_0.0001_1e-06_0.01_True_2048_False_local.h5")
-    for i in range(0,batch_to_predict_np.shape[0]):
-        prediction_list.append(cnn.predict_from_model(model, batch_to_predict_np[i][:][:][:]))
-
-    prediction_matrix = np.reshape(np.asarray(prediction_list), (y_max, x_max, 3))
-    print(prediction_matrix.shape)
-    return prediction_matrix
-    """
-    """pool2 = []
-    prediction_list = [[]] * batch_to_predict_np.shape[0]
-    for i in range(0,batch_to_predict_np.shape[0]):
-        pool2.append(Thread(target=cnn.predict_from_model_multithread, args=(batch_to_predict_np[i][:][:][:], prediction_list[i])))
-        pool2[-1].start()
-    for p in pool2:
-        p.join()
-    prediction_matrix = np.asarray(prediction_list)
-    print(prediction_matrix.shape)
-    return prediction_matrix"""
-
-
-def custom_crop_test2(slide_, y, batch_to_predict, valid_bit_list, x_max):
+def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max):
     for x in range(0, x_max-1):
         image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, y * CROP_SIZE).convert('RGB')
         resized_crop = slide.resize_image_a(image_crop, 224, 224)
@@ -460,7 +268,7 @@ def custom_crop_test2(slide_, y, batch_to_predict, valid_bit_list, x_max):
     batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
-def custom_crop_last_test2(slide_, y, batch_to_predict, valid_bit_list, x_max):
+def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max):
     for x in range(0, x_max-1):
         image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
         resized_crop = slide.resize_image_a(image_crop, 224, 224)
@@ -480,68 +288,66 @@ def custom_crop_last_test2(slide_, y, batch_to_predict, valid_bit_list, x_max):
     batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
-def get_prediction_matrix_multithread_test2(slidename):
-    slide_ = slide.open_slide(os.path.join(MAP_FOLDER, slidename))
-    slide_size = slide.get_slide_size(slide_)
-    log.print_info("Slide size : " + str(slide_size))
-    pool = []
-    x_max = ceil(slide_size[0] / CROP_SIZE)
-    y_max = ceil(slide_size[1] / CROP_SIZE)
-    log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
-    batch_to_predict = [None] * x_max * y_max
-    valid_bit_list = [None] * x_max *  y_max
-    for y in range(0, y_max-1):
-        pool.append(Thread(target=custom_crop_test2, args=(slide_, y, batch_to_predict, valid_bit_list, x_max)))
-        pool[-1].start()
-    t = Thread(target=custom_crop_last_test2, args=(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max))
-    t.start()
-    for p in pool:
-        p.join()
-    t.join()
-    """
-    for y in range(0, y_max-1):
-        custom_crop_test2(slide_, y, batch_to_predict, valid_bit_list, x_max)
-    custom_crop_last_test2(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max)"""
-    valid_bit_np=np.asarray(valid_bit_list)
-    batch_to_predict_np = np.asarray(batch_to_predict)
-    print(batch_to_predict_np.shape)
-    print(valid_bit_np.shape)
-    print("-----------------------------")
-    prediction_list = cnn.predict_from_model_multithread_temp(batch_to_predict_np)
-    prediction_np = np.asarray(prediction_list)
-    print(batch_to_predict_np.shape)
-    print(valid_bit_np.shape)
-    print(prediction_np.shape)
-    print("-----------------------------")
-    return utils.blend_np(batch_to_predict_np, prediction_np, valid_bit_np, slide_size)
+def custom_crop_temp(slide_, y, batch_to_predict, x_max):
+    for x in range(0, x_max-1):
+        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, y * CROP_SIZE).convert('RGB')
+        resized_crop = slide.resize_image_a(image_crop, 224, 224)
+        resized_crop_np = np.asarray(resized_crop, np.float32)
+        batch_to_predict[y*x_max+x] = resized_crop_np
+    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, y * CROP_SIZE).convert('RGB')
+    resized_crop = slide.resize_image_a(image_crop, 224, 224)
+    resized_crop_np = np.asarray(resized_crop, np.float32)
+    batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
-def mc_predict(iterations, slidename):
+def custom_crop_last_temp(slide_, y, batch_to_predict, x_max):
+    for x in range(0, x_max-1):
+        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
+        resized_crop = slide.resize_image_a(image_crop, 224, 224)
+        resized_crop_np = np.asarray(resized_crop, np.float32)
+        batch_to_predict[y*x_max+x] = resized_crop_np
+    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
+    resized_crop = slide.resize_image_a(image_crop, 224, 224)
+    resized_crop_np = np.asarray(resized_crop, np.float32)
+    batch_to_predict[y*x_max+x_max-1] = resized_crop_np
+
+
+def mc_predict(iterations, slidename, pred_folder, drop_rate):
     mc_predictions = []
-    slide_ = slide.open_slide(os.path.join(MAP_FOLDER, slidename))
-    slide_size = slide.get_slide_size(slide_)
-    log.print_info("Slide size : " + str(slide_size))
-    pool = []
-    x_max = ceil(slide_size[0] / CROP_SIZE)
-    y_max = ceil(slide_size[1] / CROP_SIZE)
-    log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
-    batch_to_predict = [None] * x_max * y_max
-    valid_bit_list = [None] * x_max * y_max
-    for y in range(0, y_max - 1):
-        pool.append(Thread(target=custom_crop_test2, args=(slide_, y, batch_to_predict, valid_bit_list, x_max)))
-        pool[-1].start()
-    t = Thread(target=custom_crop_last_test2, args=(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max))
-    t.start()
-    for p in pool:
-        p.join()
-    t.join()
-    valid_bit_np = np.asarray(valid_bit_list)
-    batch_to_predict_np = np.asarray(batch_to_predict)
+
+    flattened_image_name = slidename.replace(".svs", "_" + str(CROP_SIZE) + ".bin", 1)
+    if os.path.isfile(path.join(MAP_FOLDER, flattened_image_name)):
+        batch_to_predict_np = read_blob(flattened_image_name, MAP_FOLDER)
+    else:
+        slide_ = slide.open_slide(os.path.join(MAP_FOLDER, slidename))
+        slide_size = slide.get_slide_size(slide_)
+        save_blob(slide_size, slidename.replace(".svs", ".info", 1), MAP_FOLDER)
+        log.print_info("Slide size : " + str(slide_size))
+        pool = []
+        x_max = ceil(slide_size[0] / CROP_SIZE)
+        y_max = ceil(slide_size[1] / CROP_SIZE)
+        log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
+        batch_to_predict = [None] * x_max * y_max
+        valid_bit_list = [None] * x_max * y_max
+        for y in range(0, y_max - 1):
+            pool.append(Thread(target=custom_crop, args=(slide_, y, batch_to_predict, valid_bit_list, x_max)))
+            pool[-1].start()
+        t = Thread(target=custom_crop_last, args=(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max))
+        t.start()
+        for p in pool:
+            p.join()
+        t.join()
+        valid_bit_np = np.asarray(valid_bit_list)
+        save_blob(valid_bit_np, slidename.replace(".svs","")+"_"+str(CROP_SIZE)+".vbit", MAP_FOLDER)
+        batch_to_predict_np = np.asarray(batch_to_predict)
+        save_blob(batch_to_predict_np, flattened_image_name, MAP_FOLDER)
+
     for i in range(0,iterations):
         log.print_info("Step "+str(i))
-        prediction_list = cnn.predict_from_model_multithread_temp(batch_to_predict_np)
+        prediction_list = cnn.predict_from_model_multithread(batch_to_predict_np, drop_rate)
         mc_predictions.append(np.asarray(prediction_list))
-    return mc_predictions, valid_bit_np
+        save_blob(mc_predictions, slidename.replace(".svs","")+"_"+str(CROP_SIZE)+"_"+str(iterations)+".pred",pred_folder)
+        gc.collect()
 
 
 def save_blob(blob, name, directory):
@@ -549,3 +355,33 @@ def save_blob(blob, name, directory):
     pickle_out = open(blob_path, "wb")
     pickle.dump(blob, pickle_out)
     pickle_out.close()
+
+
+def read_blob(name, directory):
+    blob_path = path.join(directory, name)
+    pickle_in = open(blob_path, "rb")
+    blob = pickle.load(pickle_in)
+    pickle_in.close()
+    return blob
+
+
+def compute_ens_predictions(mc_predictions):
+    idx = []
+    prob = []
+    unc = []
+    h_prob = []
+    len = mc_predictions[0].shape[0]
+    for i in range(0, len):
+        midx, mean, std, h_mean= get_crop_pred(mc_predictions, i)
+        idx.append(midx)
+        prob.append(mean)
+        unc.append(std)
+        h_prob.append(h_mean)
+    return idx, prob, unc, h_prob
+
+
+def get_crop_pred(mc_predictions, idx):
+    p0 = np.array([p[idx] for p in mc_predictions])
+    p0_mean = p0.mean(axis=0)
+    max_idx = p0_mean.argmax()
+    return  max_idx, p0_mean[max_idx], p0.std(axis=0)[max_idx], p0_mean[2]

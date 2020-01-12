@@ -13,9 +13,11 @@ import src.cnn.testCNN as convNet
 from src.preparation import datasetManager as dm, utils
 from src.parameters import *
 import gc
+import mem_top
+from os import path
 
 
-def train():
+def train(drop_rate):
     X_train, y_train, X_test, y_test = dm.open_dataset()
     log.print_info(" TRAIN STATs")
     log.print_info(" Train set shape : " + str(X_train.shape) + " " + str(y_train.shape))
@@ -25,72 +27,111 @@ def train():
     log.print_info(" Test set shape : " + str(X_test.shape) + " " + str(y_test.shape))
     log.print_info(" Test set type : " + str(X_test.dtype))
     dm.print_stats(y_test)
-    convNet.compile_model(X_train, y_train, X_test, y_test)
+    convNet.compile_model(X_train, y_train, X_test, y_test, drop_rate)
 
 
-def produce_test_predictions():
-    iter = [1, 10]
-    drop_rates = ["0.01", "0.1", "0.5"]
+def produce_test_predictions(crop_size):
+    iter = [10]
+    drop_rates = [0.1]
     for iterations in iter:
         for dr in drop_rates:
-            pred_folder = path.join("resources", "predictions", dr)
-            for i in range(1, 6):
+            pred_folder = path.join("resources", "predictions", str(dr))
+            for i in range(5, 6):
                 start_time = time.time()
-                log.print_debug("PROCESSING map_" + str(i) + ".svs dr:" + str(dr) + " iter:" + str(iterations)+ " Crop Size:" + str(CROP_SIZE))
-                setDropRate(dr)
-                dm.mc_predict(iterations, "map_" + str(i) + ".svs", pred_folder, dr)
-                mc_predictions = dm.read_blob("map_" + str(i) + "_" + str(CROP_SIZE) + "_" + str(iterations) + ".pred",
+                log.print_debug(
+                    "PROCESSING map_" + str(i) + ".svs dr:" + str(dr) + " iter:" + str(iterations) + " Crop Size" + str(
+                        crop_size))
+                dm.mc_predict(iterations, "map_" + str(i) + ".svs", pred_folder, dr, crop_size)
+                mc_predictions = dm.read_blob("map_" + str(i) + "_" + str(crop_size) + "_" + str(iterations) + ".pred",
                                               pred_folder)
                 ens_predictions_np = dm.compute_ens_predictions(mc_predictions)
                 dm.save_blob(ens_predictions_np,
-                             "map_" + str(i) + "_" + str(CROP_SIZE) + "_" + str(iterations) + ".ens",
+                             "map_" + str(i) + "_" + str(crop_size) + "_" + str(iterations) + ".ens",
                              pred_folder)
-                np_flatten_image = dm.read_blob("map_" + str(i) + "_" + str(CROP_SIZE) + ".bin", MAP_FOLDER)
+                np_flatten_image = dm.read_blob("map_" + str(i) + "_" + str(crop_size) + ".bin", MAP_FOLDER)
                 slide_size = dm.read_blob("map_" + str(i) + ".info", MAP_FOLDER)
-                valid_bit_np = dm.read_blob("map_" + str(i) + "_" + str(CROP_SIZE) + ".vbit", MAP_FOLDER)
+                valid_bit_np = dm.read_blob("map_" + str(i) + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
                 if iterations == 1:
                     image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size,
-                                                    False)
+                                                    False, crop_size)
                 else:
                     image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size,
-                                                    True)
+                                                    True, crop_size)
                 utils.save_image(image, RESOURCE_FOLDER,
-                                 "map_" + str(i) + "_CS" + str(CROP_SIZE) + "_DR" + dr.replace("0.",
-                                                                                               "") + "_ITER" + str(
+                                 "map_" + str(i) + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.",
+                                                                                                    "") + "_ITER" + str(
                                      iterations) + "_gradient")
                 elapsed_time = time.time() - start_time
                 log.print_debug(
-                    "map_" + str(i) + "_CS" + str(CROP_SIZE) + "_DR" + dr.replace("0.", "") + "_ITER" + str(
+                    "map_" + str(i) + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(
                         iterations) + "_gradient" + ": " + str(elapsed_time))
+                # log.print_debug("BEFORE GC\n " + mem_top.mem_top())
                 gc.collect()
-
-
-def produce_gradient_images():
-    iter = [1, 10, 100]
-    drop_rates = ["0.01", "0.1", "0.5"]
+                # log.print_debug("AFTER GC\n " + mem_top.mem_top())
+    drop_rates = [0.5]
     for iterations in iter:
         for dr in drop_rates:
-            pred_folder = path.join("resources", "predictions", dr)
-            for i in range(1, 6):
+            pred_folder = path.join("resources", "predictions", str(dr))
+            for i in range(3, 6):
                 start_time = time.time()
-                log.print_debug("PROCESSING map_" + str(i) + ".svs dr:"+ str(dr) + " iter:" + str(iterations))
-                ens_predictions_np = dm.read_blob("map_" + str(i) + "_" + str(CROP_SIZE) + "_" + str(iterations) + ".ens", pred_folder)
-                np_flatten_image = dm.read_blob("map_" + str(i) + "_" + str(CROP_SIZE) + ".bin", MAP_FOLDER)
+                log.print_debug(
+                    "PROCESSING map_" + str(i) + ".svs dr:" + str(dr) + " iter:" + str(iterations) + " Crop Size" + str(
+                        crop_size))
+                dm.mc_predict(iterations, "map_" + str(i) + ".svs", pred_folder, dr, crop_size)
+                mc_predictions = dm.read_blob("map_" + str(i) + "_" + str(crop_size) + "_" + str(iterations) + ".pred",
+                                              pred_folder)
+                ens_predictions_np = dm.compute_ens_predictions(mc_predictions)
+                dm.save_blob(ens_predictions_np,
+                             "map_" + str(i) + "_" + str(crop_size) + "_" + str(iterations) + ".ens",
+                             pred_folder)
+                np_flatten_image = dm.read_blob("map_" + str(i) + "_" + str(crop_size) + ".bin", MAP_FOLDER)
                 slide_size = dm.read_blob("map_" + str(i) + ".info", MAP_FOLDER)
-                valid_bit_np = dm.read_blob("map_" + str(i) + "_" + str(CROP_SIZE) + ".vbit", MAP_FOLDER)
+                valid_bit_np = dm.read_blob("map_" + str(i) + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
                 if iterations == 1:
-                    image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, False)
+                    image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size,
+                                                    False, crop_size)
                 else:
-                    image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, True)
-                utils.save_image(image, RESOURCE_FOLDER,
-                                 "map_" + str(i) + "_CS" + str(CROP_SIZE) + "_DR" + dr.replace("0.", "") + "_ITER" + str(iterations) + "_gradient")
+                    image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size,
+                                                    True, crop_size)
+                utils.save_image(image, RESOURCE_FOLDER, "map_" + str(i) + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.","") + "_ITER" + str(iterations) + "_gradient")
                 elapsed_time = time.time() - start_time
                 log.print_debug(
-                    "map_" + str(i) + "_CS" + str(CROP_SIZE) + "_DR" + dr.replace("0.", "") + "_ITER" + str(iterations) + "_gradient" + ": " + str(elapsed_time))
+                    "map_" + str(i) + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(
+                        iterations) + "_gradient" + ": " + str(elapsed_time))
+                #log.print_debug("BEFORE GC\n " + mem_top.mem_top())
                 gc.collect()
+                #log.print_debug("AFTER GC\n " + mem_top.mem_top())
+
+
+def make_prediction(path_list, crop_size, dr, iterations):
+    for file in path_list:
+        if path.isfile(file):
+            start_time = time.time()
+            log.print_debug("PROCESSING "+ file +" dr:" + str(dr) + " iter:" + str(iterations) + " Crop Size" + str(crop_size))
+            pred_folder = path.join("resources", "predictions", str(dr))
+            basename = str(path.basename(file).split(".", 1)[0])
+            dm.mc_predict_from_path(iterations, file, pred_folder, dr, crop_size)
+            mc_predictions = dm.read_blob( basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred", pred_folder)
+            ens_predictions_np = dm.compute_ens_predictions(mc_predictions)
+            dm.save_blob(ens_predictions_np, basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens", pred_folder)
+            np_flatten_image = dm.read_blob(basename + "_" + str(crop_size) + ".bin", MAP_FOLDER)
+            slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
+            valid_bit_np = dm.read_blob(basename + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
+            if iterations == 1:
+                image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, False, crop_size)
+            else:
+                image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, True, crop_size)
+            utils.save_image(image, RESOURCE_FOLDER, basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient")
+            elapsed_time = time.time() - start_time
+            log.print_debug(basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient" + ": " + str(elapsed_time))
+            log.print_debug("BEFORE GC\n " + mem_top.mem_top())
+            gc.collect()
+        else:
+            log.print_debug(file + "doesn't exist.")
+
 
 def main():
-    produce_test_predictions()
+    make_prediction(["D:\\users\\jacopo\\Documenti\\Poli\\BioInfoPrj\\CNN_AidedDiagnosisTool\\resources\\DATASET_ROI\\MAP\\map_3.svs", "D:\\users\\jacopo\\Documenti\\Poli\\BioInfoPrj\\CNN_AidedDiagnosisTool\\resources\\DATASET_ROI\\MAP\\map_4.svs"], 224, 0.5, 10)
     return 0
 
 

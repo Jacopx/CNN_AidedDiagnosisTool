@@ -530,13 +530,13 @@ def blend_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_im
 
 """
 
-def blend_np_gradient(image_np, ens_prediction, valid_bit_np, slide_size, print_std):
+def blend_np_gradient(image_np, ens_prediction, valid_bit_np, slide_size, print_std, crop_size):
     global PRINT_STD
     PRINT_STD = print_std
-    x_max = ceil(slide_size[0] / CROP_SIZE)
-    y_max = ceil(slide_size[1] / CROP_SIZE)
-    bi_x = int(slide_size[0] * image_np.shape[2] / CROP_SIZE)
-    bi_y = int(slide_size[1] * image_np.shape[1] / CROP_SIZE)
+    x_max = ceil(slide_size[0] / crop_size)
+    y_max = ceil(slide_size[1] / crop_size)
+    bi_x = int(slide_size[0] * image_np.shape[2] / crop_size)
+    bi_y = int(slide_size[1] * image_np.shape[1] / crop_size)
     blended_img = Image.new('RGB', (bi_x, bi_y))
     pool = []
     gradient = get_color_gradient()
@@ -703,37 +703,6 @@ def blend_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, b
         blended_np[:, :, 2].fill(color[2])
         mask = np_to_pil(blended_np, COLOR)
         blended_img.paste(blend(base_img, mask, 1), (j * image_np.shape[2], i * image_np.shape[1]))
-
-
-"""def get_color_gradient():
-    dmagenta = Color("DarkMagenta")
-    magenta = Color("Magenta")
-    dred = Color("DarkRed")
-    red = Color("Red")
-    orange = Color("Orange")
-    yellow = Color("Yellow")
-    green = Color("Green")
-    blue = Color("Blue")
-    bviolet = Color("BlueViolet")
-    violet = Color("Violet")
-    dviolet = Color("DarkViolet")
-    purple = Color("Purple")
-    colors = list()
-    colors = colors + list(magenta.range_to(dmagenta, 10))
-    colors = colors + list(dmagenta.range_to(dred, 10))
-    colors = colors + list(dred.range_to(red, 10))
-    colors = colors + list(red.range_to(orange, 10))
-    colors = colors + list(orange.range_to(yellow, 10))
-    colors = colors + list(yellow.range_to(green, 10))
-    colors = colors + list(green.range_to(blue, 10))
-    colors = colors + list(blue.range_to(bviolet, 10))
-    colors = colors + list(bviolet.range_to(violet, 10))
-    colors = colors + list(violet.range_to(dviolet, 10))
-    colors.append(purple)
-    gradient = []
-    for c in colors:
-        gradient.append([int(c.get_red() * 255), int(c.get_green() * 255), int(c.get_blue() * 255)])
-    return gradient"""
 
 
 def get_color_gradient():

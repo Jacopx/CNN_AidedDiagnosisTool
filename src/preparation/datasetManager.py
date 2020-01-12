@@ -248,9 +248,9 @@ def open_dataset():
     return X_train , y_train, X_test, y_test
 
 
-def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max):
+def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size):
     for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, y * CROP_SIZE).convert('RGB')
+        image_crop = slide.read_slide_crop(slide_, x * crop_size, y * crop_size, crop_size).convert('RGB')
         resized_crop = slide.resize_image_a(image_crop, 224, 224)
         resized_crop_np = np.asarray(resized_crop, np.float32)
         if filter.check_valid(resized_crop_np):
@@ -258,7 +258,7 @@ def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max):
         else:
             valid_bit_list[y*x_max+x] = 0
         batch_to_predict[y*x_max+x] = resized_crop_np
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, y * CROP_SIZE).convert('RGB')
+    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - crop_size, y * crop_size, crop_size).convert('RGB')
     resized_crop = slide.resize_image_a(image_crop, 224, 224)
     resized_crop_np = np.asarray(resized_crop, np.float32)
     if filter.check_valid(resized_crop_np):
@@ -268,9 +268,9 @@ def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max):
     batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
-def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max):
+def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size):
     for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
+        image_crop = slide.read_slide_crop(slide_, x * crop_size, slide.get_slide_size(slide_)[1] - crop_size, crop_size).convert('RGB')
         resized_crop = slide.resize_image_a(image_crop, 224, 224)
         resized_crop_np = np.asarray(resized_crop, np.float32)
         if filter.check_valid(resized_crop_np):
@@ -278,7 +278,7 @@ def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max):
         else:
             valid_bit_list[y*x_max+x] = 0
         batch_to_predict[y*x_max+x] = resized_crop_np
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
+    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - crop_size, slide.get_slide_size(slide_)[1] - crop_size, crop_size).convert('RGB')
     resized_crop = slide.resize_image_a(image_crop, 224, 224)
     resized_crop_np = np.asarray(resized_crop, np.float32)
     if filter.check_valid(resized_crop_np):
@@ -288,35 +288,12 @@ def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max):
     batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
-def custom_crop_temp(slide_, y, batch_to_predict, x_max):
-    for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, y * CROP_SIZE).convert('RGB')
-        resized_crop = slide.resize_image_a(image_crop, 224, 224)
-        resized_crop_np = np.asarray(resized_crop, np.float32)
-        batch_to_predict[y*x_max+x] = resized_crop_np
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, y * CROP_SIZE).convert('RGB')
-    resized_crop = slide.resize_image_a(image_crop, 224, 224)
-    resized_crop_np = np.asarray(resized_crop, np.float32)
-    batch_to_predict[y*x_max+x_max-1] = resized_crop_np
-
-
-def custom_crop_last_temp(slide_, y, batch_to_predict, x_max):
-    for x in range(0, x_max-1):
-        image_crop = slide.read_slide_crop(slide_, x * CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
-        resized_crop = slide.resize_image_a(image_crop, 224, 224)
-        resized_crop_np = np.asarray(resized_crop, np.float32)
-        batch_to_predict[y*x_max+x] = resized_crop_np
-    image_crop = slide.read_slide_crop(slide_, slide.get_slide_size(slide_)[0] - CROP_SIZE, slide.get_slide_size(slide_)[1] - CROP_SIZE).convert('RGB')
-    resized_crop = slide.resize_image_a(image_crop, 224, 224)
-    resized_crop_np = np.asarray(resized_crop, np.float32)
-    batch_to_predict[y*x_max+x_max-1] = resized_crop_np
-
-
-def mc_predict(iterations, slidename, pred_folder, drop_rate):
+def mc_predict(iterations, slidename, pred_folder, drop_rate, crop_size):
     mc_predictions = []
 
-    flattened_image_name = slidename.replace(".svs", "_" + str(CROP_SIZE) + ".bin", 1)
-    if os.path.isfile(path.join(MAP_FOLDER, flattened_image_name)):
+    flattened_image_name = slidename.replace(".svs", "_" + str(crop_size) + ".bin", 1)
+    path_ = path.join(MAP_FOLDER, flattened_image_name)
+    if os.path.isfile(path_):
         batch_to_predict_np = read_blob(flattened_image_name, MAP_FOLDER)
     else:
         slide_ = slide.open_slide(os.path.join(MAP_FOLDER, slidename))
@@ -324,30 +301,79 @@ def mc_predict(iterations, slidename, pred_folder, drop_rate):
         save_blob(slide_size, slidename.replace(".svs", ".info", 1), MAP_FOLDER)
         log.print_info("Slide size : " + str(slide_size))
         pool = []
-        x_max = ceil(slide_size[0] / CROP_SIZE)
-        y_max = ceil(slide_size[1] / CROP_SIZE)
+        x_max = ceil(slide_size[0] / crop_size)
+        y_max = ceil(slide_size[1] / crop_size)
         log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
         batch_to_predict = [None] * x_max * y_max
         valid_bit_list = [None] * x_max * y_max
         for y in range(0, y_max - 1):
-            pool.append(Thread(target=custom_crop, args=(slide_, y, batch_to_predict, valid_bit_list, x_max)))
+            pool.append(Thread(target=custom_crop, args=(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size)))
             pool[-1].start()
-        t = Thread(target=custom_crop_last, args=(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max))
+        t = Thread(target=custom_crop_last, args=(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max, crop_size))
         t.start()
         for p in pool:
             p.join()
         t.join()
         valid_bit_np = np.asarray(valid_bit_list)
-        save_blob(valid_bit_np, slidename.replace(".svs","")+"_"+str(CROP_SIZE)+".vbit", MAP_FOLDER)
+        save_blob(valid_bit_np, slidename.replace(".svs","")+"_"+str(crop_size)+".vbit", MAP_FOLDER)
         batch_to_predict_np = np.asarray(batch_to_predict)
         save_blob(batch_to_predict_np, flattened_image_name, MAP_FOLDER)
+        del valid_bit_list
+        del valid_bit_np
+        del batch_to_predict
 
     for i in range(0,iterations):
         log.print_info("Step "+str(i))
         prediction_list = cnn.predict_from_model_multithread(batch_to_predict_np, drop_rate)
         mc_predictions.append(np.asarray(prediction_list))
-        save_blob(mc_predictions, slidename.replace(".svs","")+"_"+str(CROP_SIZE)+"_"+str(iterations)+".pred",pred_folder)
+        save_blob(mc_predictions, slidename.replace(".svs","")+"_"+str(crop_size)+"_"+str(iterations)+".pred",pred_folder)
+        del prediction_list
         gc.collect()
+    del batch_to_predict_np
+
+
+def mc_predict_from_path(iterations, file_path, pred_folder, drop_rate, crop_size):
+    mc_predictions = []
+    slidename = str(path.basename(file_path))
+    flattened_image_name = slidename.replace(".svs", "_" + str(crop_size) + ".bin", 1)
+    path_ = path.join(MAP_FOLDER, flattened_image_name)
+    if os.path.isfile(path_):
+        batch_to_predict_np = read_blob(flattened_image_name, MAP_FOLDER)
+    else:
+        slide_ = slide.open_slide(file_path)
+        slide_size = slide.get_slide_size(slide_)
+        save_blob(slide_size, slidename.replace(".svs", ".info", 1), MAP_FOLDER)
+        log.print_info("Slide size : " + str(slide_size))
+        pool = []
+        x_max = ceil(slide_size[0] / crop_size)
+        y_max = ceil(slide_size[1] / crop_size)
+        log.print_info("Matrix size : " + str(y_max) + " " + str(x_max))
+        batch_to_predict = [None] * x_max * y_max
+        valid_bit_list = [None] * x_max * y_max
+        for y in range(0, y_max - 1):
+            pool.append(Thread(target=custom_crop, args=(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size)))
+            pool[-1].start()
+        t = Thread(target=custom_crop_last, args=(slide_, y_max - 1, batch_to_predict, valid_bit_list, x_max, crop_size))
+        t.start()
+        for p in pool:
+            p.join()
+        t.join()
+        valid_bit_np = np.asarray(valid_bit_list)
+        save_blob(valid_bit_np, slidename.replace(".svs","")+"_"+str(crop_size)+".vbit", MAP_FOLDER)
+        batch_to_predict_np = np.asarray(batch_to_predict)
+        save_blob(batch_to_predict_np, flattened_image_name, MAP_FOLDER)
+        del valid_bit_list
+        del valid_bit_np
+        del batch_to_predict
+
+    for i in range(0,iterations):
+        log.print_info("Step "+str(i))
+        prediction_list = cnn.predict_from_model_multithread(batch_to_predict_np, drop_rate)
+        mc_predictions.append(np.asarray(prediction_list))
+        save_blob(mc_predictions, slidename.replace(".svs","")+"_"+str(crop_size)+"_"+str(iterations)+".pred",pred_folder)
+        del prediction_list
+        gc.collect()
+    del batch_to_predict_np
 
 
 def save_blob(blob, name, directory):

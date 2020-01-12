@@ -8,82 +8,82 @@ from contextlib import redirect_stdout
 from src.parameters import *
 
 
-def normal_convolution_net(inputs):
+def normal_convolution_net(inputs, drop_rate):
     x = layers.BatchNormalization
     # 3 * 3 * 64 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(inputs)
     x = layers.Conv2D(filters=64, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
 
     # 3 * 3 * 64 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=64, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 2 * 2 max pooling stride 2
     x = layers.MaxPool2D(pool_size=2, strides=2, padding='valid')(x)
     # 3 * 3 * 128 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=128, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 128 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=128, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 2 * 2 max pooling stride 2
     x = layers.MaxPool2D(pool_size=2, strides=2, padding='valid')(x)
     # 3 * 3 * 256 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=256, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 256 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=256, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 256 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=256, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 2 * 2 max pooling stride 2
     x = layers.MaxPool2D(pool_size=2, strides=2, padding='valid')(x)
     # 3 * 3 * 512 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=512, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 512 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=512, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 512 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=512, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 2 * 2 max pooling stride 2
     x = layers.MaxPool2D(pool_size=2, strides=2, padding='valid')(x)
     # 3 * 3 * 512 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=512, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 512 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=512, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 3 * 3 * 512 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(x)
     x = layers.Conv2D(filters=512, kernel_size=3, strides=1, padding='valid', activation='relu',
                       use_bias=USE_BIAS, kernel_initializer='glorot_uniform', bias_initializer='zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     # 2 * 2 max pooling stride 2
     x = layers.MaxPool2D(pool_size=2, strides=2, padding='valid')(x)
     x = layers.Flatten()(x)
@@ -92,13 +92,13 @@ def normal_convolution_net(inputs):
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     x = layers.Dense(DENSE_SIZE,
                            activation        = 'relu',
                            use_bias          = USE_BIAS,
                            kernel_initializer= 'glorot_uniform',
                            bias_initializer  = 'zeros')(x)
-    x = layers.Dropout(rate=DROP_RATE)(x, training=True)
+    x = layers.Dropout(rate=drop_rate)(x, training=True)
     output = layers.Dense(N_CLASSES,
                            activation        = 'softmax',
                            use_bias          = USE_BIAS,
@@ -107,11 +107,11 @@ def normal_convolution_net(inputs):
     return output
 
 
-def bayesian_cnn(inputs):
-    return normal_convolution_net(inputs)
+def bayesian_cnn(inputs, drop_rate):
+    return normal_convolution_net(inputs, drop_rate)
 
 
-def compile_model(x_train, y_train, x_test, y_test):
+def compile_model(x_train, y_train, x_test, y_test, drop_rate):
 
     if tf.test.is_built_with_cuda:
         if tf.test.is_gpu_available(cuda_only=False, min_cuda_compute_capability=None):
@@ -121,11 +121,11 @@ def compile_model(x_train, y_train, x_test, y_test):
     else:
         log.print_warning("THIS VERSION OF TENSORFLOW DOES NOT USES CUDA")
     input_tensor = tf.keras.Input(shape=x_train[0].shape)
-    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs = input_tensor))
+    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs = input_tensor, drop_rate=drop_rate))
     opt = tf.keras.optimizers.Adam(lr = LEARNING_RATE, decay = DECAY)
     bayesian_model.compile(loss = 'sparse_categorical_crossentropy', optimizer = opt, metrics = ['accuracy'])
     model_name = str(x_train[0].shape[0]) + "_" + str(N_EPOCH) + "_" + str(BATCH_SIZE) + "_" + str(LEARNING_RATE) \
-                 + "_" + str(DECAY) + "_" + str(DROP_RATE) + "_" + str(USE_BIAS) + "_" + str(DENSE_SIZE) + "_" \
+                 + "_" + str(DECAY) + "_" + str(drop_rate) + "_" + str(USE_BIAS) + "_" + str(DENSE_SIZE) + "_" \
                  + str(SEPARABLE_CONVOLUTION) + "_local.h5"
     bayesian_model.summary()
     # Save model skeleton
@@ -164,11 +164,11 @@ def compile_model(x_train, y_train, x_test, y_test):
     plt.show()"""
 
 
-def predict_from_model(batch_to_predict):
+def predict_from_model(batch_to_predict, drop_rate):
     model_name = "224_10_32_0.0001_1e-06_0.1_True_2048_False_local.h5"
     model_path = os.path.join(MODEL_FOLDER, model_name)
     input_tensor = tf.keras.Input(shape=(224, 224, 3))
-    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor))
+    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor, drop_rate=drop_rate))
     bayesian_model.load_weights(model_path, by_name=False)
     log.print_info('Model loaded')
     print(str(batch_to_predict.shape))
@@ -198,16 +198,17 @@ def predict_from_model(batch_to_predict):
     return prediction_list
 
 
-def load_model(model_name):
+def load_model(model_name, drop_rate):
     model_path = os.path.join(MODEL_FOLDER, model_name)
     input_tensor = tf.keras.Input(shape=(224, 224, 3))
-    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor))
+    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor, drop_rate=drop_rate))
     bayesian_model.load_weights(model_path, by_name=False)
     log.print_info("Loaded model "+model_name)
     return bayesian_model
 
 
 def predict_from_model_multithread(batch_to_predict, drop_rate):
-    bayesian_model = load_model("224_10_32_0.0001_1e-06_"+str(drop_rate)+"_True_2048_False_local.h5")
+    bayesian_model = load_model("224_10_32_0.0001_1e-06_"+str(drop_rate)+"_True_2048_False_local.h5", drop_rate)
     predictions = bayesian_model.predict(batch_to_predict, batch_size=BATCH_SIZE, verbose=1, workers=100, use_multiprocessing=True)
+    del bayesian_model
     return predictions

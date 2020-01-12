@@ -44,10 +44,10 @@ def open_slide(slide_path):
     return slide
 
 
-def read_slide_crop(slide,x,y):
+def read_slide_crop(slide,x,y, crop_size):
     start_time = time.time()
     #log.print_debug("Converting slide to image. Requires time!")
-    image = slide.read_region((x, y), LVL, (CROP_SIZE, CROP_SIZE))
+    image = slide.read_region((x, y), LVL, (crop_size, crop_size))
     elapsed_time = time.time() - start_time
     log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image

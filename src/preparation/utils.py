@@ -32,6 +32,7 @@ def test_folder():
     make_folder(MAP_FOLDER)
     make_folder(MODEL_FOLDER)
     make_folder(PREDICTION_FOLDER)
+    make_folder(SEGMENTED_FOLDER)
     drop_rates = [0.01, 0.1, 0.5]
     for dr in drop_rates:
         make_folder(path.join("resources", "predictions", str(dr)))
@@ -489,21 +490,65 @@ def blend_multiple_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_pred
         blended_img.paste(blend(base_img, mask, 1), (j * image_np.shape[2], i * image_np.shape[1]))
 
 
+def save_np_image(image_np, slide_size, crop_size):
+    global PRINT_STD
+    x_max = ceil(slide_size[0] / crop_size)
+    y_max = ceil(slide_size[1] / crop_size)
+    bi_x = int(slide_size[0] * image_np.shape[2] / crop_size)
+    bi_y = int(slide_size[1] * image_np.shape[1] / crop_size)
+    blended_img = Image.new('RGB', (bi_x, bi_y))
+    pool = []
+    for i in range(0, y_max - 1):
+        pool.append(Thread(target=blend_last_column_np_thread, args=(i, x_max, image_np, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    pool = []
+    for j in range(0, x_max - 1):
+        pool.append(Thread(target=blend_last_row_np_thread, args=(y_max-1 ,j, x_max, image_np, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    blend_last_np(image_np, blended_img)
+    pool = []
+    for i in range(0, y_max - 1):
+        for j in range(0, x_max - 1):
+            pool.append(Thread(target=blend_np_thread, args=(i, j, x_max, image_np, blended_img)))
+            pool[-1].start()
+    for p in pool:
+        p.join()
+    return blended_img
 
-"""def get_color_gradient():
-    red = Color("Red")
-    orange = Color("Orange")
-    yellow = Color("Yellow")
-    violet = Color("Violet")
-    colors = list()
-    colors = colors + list(red.range_to(orange, 30))
-    colors = colors + list(orange.range_to(yellow, 30))
-    colors = colors + list(yellow.range_to(violet, 41))
-    gradient = []
-    for c in colors:
-        gradient.append([int(c.get_red() * 255), int(c.get_green() * 255), int(c.get_blue() * 255)])
-    return gradient
-"""
+
+def blend_last_column_np_thread(i, x_max, image_np, blended_img):
+    index = i * x_max + x_max - 1
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    t_x = blended_img.size[0] - image_np.shape[2]
+    t_y = i * image_np.shape[1]
+    blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_last_row_np_thread(i, j, x_max, image_np, blended_img):
+    index = i * x_max + j
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    t_x = j * image_np.shape[2]
+    t_y = blended_img.size[1] - image_np.shape[1]
+    blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_last_np(image_np, blended_img):
+    index = -1
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    t_x = blended_img.size[0] - image_np.shape[2]
+    t_y = blended_img.size[1] - image_np.shape[1]
+    blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_np_thread(i, j, x_max, image_np, blended_img):
+    index = i * x_max + j
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    blended_img.paste(base_img, (j * image_np.shape[2], i * image_np.shape[1]))
+
 
 def get_color_gradient():
     red = Color("Red")

@@ -14,6 +14,7 @@ import main
 
 COOL_DOWN_TIME = 1
 
+
 # MainWindows class
 class Ui_MainWindow(object):
     # Function executed and the instantiation of class
@@ -114,7 +115,6 @@ class Ui_MainWindow(object):
         if len(file_name[0]) > 0:
             main.make_prediction(file_name[0], 2240, 0.5, 1)
             # p = multiprocessing.Process(target=self.controller, args=(file_name[0], outfile))
-
 
     # Process
     def controller(self, in_file, out_file):

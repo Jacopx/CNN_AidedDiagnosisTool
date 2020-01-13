@@ -117,7 +117,17 @@ class Ui_MainWindow(object):
 
     # Show image
     def show_img(self, path):
-        self.image.setPixmap(QtGui.QPixmap(path))
+        width = self.centralwidget.width()
+        height = self.centralwidget.height()
+
+        pix = QtGui.QPixmap(path)
+
+        if pix.height() >= height:
+            pix = pix.scaledToHeight(height)
+        elif pix.width() >= width:
+            pix = pix.scaledToWidth(width)
+
+        self.image.setPixmap(pix)
 
     # Clear image
     def clear_img(self):

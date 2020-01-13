@@ -153,15 +153,6 @@ def compile_model(x_train, y_train, x_test, y_test, drop_rate):
     log.print_info('Test loss : ' + str(scores[0]))
     log.print_info('Test accuracy : ' + str(scores[1]))
 
-    """loss = bayesian_train.history['loss']
-    val_loss = bayesian_train.history['val_loss']
-    epochs = range(N_EPOCH)
-    plt.figure()
-    plt.plot(epochs, loss, 'bo', label='Training loss')
-    plt.plot(epochs, val_loss, 'b', label='Validation loss')
-    plt.title('Training and validation loss')
-    plt.legend()
-    plt.show()"""
 
 
 def predict_from_model(batch_to_predict, drop_rate):

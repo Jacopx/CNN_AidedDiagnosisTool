@@ -22,12 +22,14 @@ DATASET_FOLDER = path.join("resources", "DATASET_ROI")
 MAP_FOLDER = path.join("resources", "DATASET_ROI", "MAP")
 FILTER_FOLDER = path.join("resources", "filtered")
 RESOURCE_FOLDER = path.join("resources")
+PREPARATION_FOLDER = path.join("resources","src","preparation")
 CROP_FOLDER = path.join("resources", "cropped_dataset","overlap_no_padding")
 SET_FOLDER = path.join("resources", "cropped_dataset","dataset_train_test",str(INPUT_SIZE))
 DUMMY_SET_FOLDER = path.join("resources", "cropped_dataset","dummyset_train_test",str(INPUT_SIZE))
 MODEL_FOLDER = path.join("resources", "models")
 SUMMARY_FOLDER = path.join("resources", "models","summary")
 PREDICTION_FOLDER = path.join("resources", "predictions")
+
 
 
 ###############################################################

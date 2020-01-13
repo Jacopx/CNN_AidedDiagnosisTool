@@ -24,7 +24,7 @@ COLOR = "RGB"  # (3x8-bit pixels, true color)
 COLOR_ALPHA = "RGBA"  # (4x8-bit pixels, true color with transparency mask)
 PRINT_STD = "true"
 
-font_ = os.path.join(RESOURCE_FOLDER,"arial.ttf")
+font_ = os.path.join(PREPARATION_FOLDER,"arial.ttf")
 
 def test_folder():
     make_folder(RESOURCE_FOLDER)

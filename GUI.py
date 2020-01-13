@@ -19,6 +19,8 @@ class Ui_MainWindow(object):
     def __init__(self):
         self.setupUi(MainWindow)
         self.define_actions()
+        self.mask = False
+        self.out_file = []
 
     # AUTO GENERATED GRAPHICAL
     def setupUi(self, MainWindow):
@@ -35,16 +37,9 @@ class Ui_MainWindow(object):
         self.clear_button = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.clear_button.setObjectName("clear_button")
         self.horizontalLayout.addWidget(self.clear_button)
-        self.progressBar = QtWidgets.QProgressBar(self.horizontalLayoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.progressBar.sizePolicy().hasHeightForWidth())
-        self.progressBar.setSizePolicy(sizePolicy)
-        self.progressBar.setMaximumSize(QtCore.QSize(300, 9))
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setObjectName("progressBar")
-        self.horizontalLayout.addWidget(self.progressBar)
+        self.mask_button = QtWidgets.QPushButton(self.horizontalLayoutWidget)
+        self.mask_button.setObjectName("mask_button")
+        self.horizontalLayout.addWidget(self.mask_button)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.image = QtWidgets.QLabel(self.centralwidget)
@@ -80,6 +75,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.clear_button.setText(_translate("MainWindow", "Clear"))
+        self.mask_button.setText(_translate("MainWindow", "Mask"))
         self.image.setText(_translate("MainWindow", "Image"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionOpen.setText(_translate("MainWindow", "Open..."))
@@ -94,6 +90,7 @@ class Ui_MainWindow(object):
     def define_actions(self):
         # Buttons
         self.clear_button.clicked.connect(self.clear_img)
+        self.mask_button.clicked.connect(self.mask_change)
 
         # Menu Bar
         self.actionOpen.triggered.connect(self.open_file)
@@ -105,21 +102,18 @@ class Ui_MainWindow(object):
     def open_file(self):
         file_name = QFileDialog.getOpenFileNames()
 
-        # # Using manager for a sharing variable
-        # manager = multiprocessing.Manager()
-        # outfile = manager.list()
-
         # Single image selected a new process is started
         if len(file_name[0]) > 0:
-            out_file = main.make_prediction(file_name[0], 2240, 0.5, 1)
-            self.show_img(out_file[0][1])
-            # p = multiprocessing.Process(target=self.controller, args=(file_name[0], outfile))
+            self.out_file = main.make_prediction(file_name[0], 2240, 0.5, 1)
+            self.show_img(self.out_file[0][1])
 
-    # Process
-    def controller(self, in_file, out_file):
-        out_file = main.make_prediction(in_file, 2240, 0.5, 1)
-        self.show_img(out_file[0])
-        return
+    def mask_change(self):
+        if self.mask:
+            self.show_img(self.out_file[0][0])
+            self.mask = False
+        else:
+            self.show_img(self.out_file[0][1])
+            self.mask = True
 
     # Show image
     def show_img(self, path):

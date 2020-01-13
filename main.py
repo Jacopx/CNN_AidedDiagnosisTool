@@ -92,7 +92,6 @@ def make_prediction(path_list, crop_size, dr, iterations):
             utils.save_image(image, RESOURCE_FOLDER, basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient")
             elapsed_time = time.time() - start_time
             log.print_debug(basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient" + ": " + str(elapsed_time))
-            log.print_debug("BEFORE GC\n " + mem_top.mem_top())
             gc.collect()
         else:
             log.print_debug(file + "doesn't exist.")

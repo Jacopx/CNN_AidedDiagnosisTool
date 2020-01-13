@@ -28,7 +28,6 @@ SCALE_FACTOR = 24
 def open_slide(slide_path):
     start_time = time.time()
     try:
-        # Create target Directory
         slide = openslide.open_slide(slide_path)
     except Exception:
         slide = None

@@ -195,3 +195,411 @@ def get_prediction_matrix_multithread_test(slidename):
     print("-----------------------------")
     return utils.blend_np(batch_to_predict_np, prediction_np, valid_bit_np, slide_size)"""
 
+
+
+
+"""def blend_np(image_np, prediction_np, valid_bit_np, slide_size):
+    x_max = ceil(slide_size[0] / CROP_SIZE)
+    y_max = ceil(slide_size[1] / CROP_SIZE)
+    bi_x = int(slide_size[0] * image_np.shape[2] / CROP_SIZE)
+    bi_y = int(slide_size[1] * image_np.shape[1] / CROP_SIZE)
+    blended_img = Image.new('RGB', (bi_x, bi_y))
+    pool = []
+    for i in range(0, y_max - 1):
+        pool.append(Thread(target=blend_last_column_thread, args=(i, x_max, image_np, valid_bit_np, prediction_np, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    pool = []
+    for j in range(0, x_max - 1):
+        pool.append(Thread(target=blend_last_row_thread, args=(y_max-1 ,j, x_max, image_np, valid_bit_np, prediction_np, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    blend_last(image_np, valid_bit_np, prediction_np, blended_img)
+    pool = []
+    for i in range(0, y_max - 1):
+        for j in range(0, x_max - 1):
+            pool.append(Thread(target=blend_thread, args=(i, j, x_max, image_np, valid_bit_np, prediction_np, blended_img)))
+            pool[-1].start()
+    for p in pool:
+        p.join()
+    return blended_img"""
+
+
+"""def blend_np_var(image_np, ens_prediction, valid_bit_np, slide_size):
+    x_max = ceil(slide_size[0] / CROP_SIZE)
+    y_max = ceil(slide_size[1] / CROP_SIZE)
+    bi_x = int(slide_size[0] * image_np.shape[2] / CROP_SIZE)
+    bi_y = int(slide_size[1] * image_np.shape[1] / CROP_SIZE)
+    blended_img = Image.new('RGB', (bi_x, bi_y))
+    pool = []
+    for i in range(0, y_max - 1):
+        pool.append(Thread(target=blend_last_column_thread, args=(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    pool = []
+    for j in range(0, x_max - 1):
+        pool.append(Thread(target=blend_last_row_thread, args=(y_max-1 ,j, x_max, image_np, valid_bit_np, ens_prediction, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    blend_last(image_np, valid_bit_np, ens_prediction, blended_img)
+    pool = []
+    for i in range(0, y_max - 1):
+        for j in range(0, x_max - 1):
+            pool.append(Thread(target=blend_thread, args=(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img)))
+            pool[-1].start()
+    for p in pool:
+        p.join()
+    return blended_img
+
+
+def blend_last_column_thread(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    index = i * x_max + x_max - 1
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0 :  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = i * image_np.shape[1]
+            blended_img.paste(blend(base_img, mask), (t_x, t_y))
+        elif prediction_np[index] == 1 :  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = i * image_np.shape[1]
+            blended_img.paste(blend(base_img, mask), (t_x, t_y))
+        else:
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = i * image_np.shape[1]
+            blended_img.paste(base_img, (t_x, t_y))
+    else:
+        t_x = blended_img.size[0] - image_np.shape[2]
+        t_y = i * image_np.shape[1]
+        blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_last_row_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    index = i * x_max + j
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0:  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = j * image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask), (t_x, t_y))
+        elif prediction_np[index] == 1:  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = j * image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask), (t_x, t_y))
+        else:
+            t_x = j * image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(base_img, (t_x, t_y))
+    else:
+        t_x = j * image_np.shape[2]
+        t_y = blended_img.size[1]-image_np.shape[1]
+        blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_last(image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    index = -1
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0 :  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask), (t_x, t_y))
+        elif prediction_np[index] == 1:  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask), (t_x, t_y))
+        else:
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(base_img, (t_x, t_y))
+    else:
+        t_x = blended_img.size[0] - image_np.shape[2]
+        t_y = blended_img.size[1]-image_np.shape[1]
+        blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    helvetica = ImageFont.truetype(font="arial.ttf", size=30)
+    d = ImageDraw.Draw(blended_img)
+    text_color = (0, 0, 0)
+    index = i * x_max + j
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0:  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            blended_img.paste(blend(base_img, mask), (j * image_np.shape[2], i * image_np.shape[1]))
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 10)
+            d.text(location, "{:.2%}".format(ens_prediction[2][index]), font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 50)
+            d.text(location, "{:.2}".format(ens_prediction[1][index]) , font=helvetica, fill=text_color)
+        elif prediction_np[index] == 1:  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            blended_img.paste(blend(base_img, mask), (j * image_np.shape[2], i * image_np.shape[1]))
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 10)
+            d.text(location, "{:.2%}".format(ens_prediction[2][index]), font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 50)
+            d.text(location, "{:.2}".format(ens_prediction[1][index]) , font=helvetica, fill=text_color)
+        else:
+            blended_img.paste(base_img, (j * image_np.shape[2], i * image_np.shape[1]))
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 10)
+            d.text(location, "{:.2%}".format(ens_prediction[2][index]), font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 50)
+            d.text(location, "{:.2}".format(ens_prediction[1][index]) , font=helvetica, fill=text_color)
+    else:
+        blended_img.paste(base_img, (j * image_np.shape[2], i * image_np.shape[1]))
+"""
+
+"""def blend_np_var(image_np, ens_prediction, valid_bit_np, slide_size):
+    x_max = ceil(slide_size[0] / CROP_SIZE)
+    y_max = ceil(slide_size[1] / CROP_SIZE)
+    bi_x = int(slide_size[0] * image_np.shape[2] / CROP_SIZE)
+    bi_y = int(slide_size[1] * image_np.shape[1] / CROP_SIZE)
+    blended_img = Image.new('RGB', (bi_x, bi_y))
+    pool = []
+    for i in range(0, y_max - 1):
+        pool.append(Thread(target=blend_last_column_thread, args=(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    pool = []
+    for j in range(0, x_max - 1):
+        pool.append(Thread(target=blend_last_row_thread, args=(y_max-1 ,j, x_max, image_np, valid_bit_np, ens_prediction, blended_img)))
+        pool[-1].start()
+    for p in pool:
+        p.join()
+    blend_last(image_np, valid_bit_np, ens_prediction, blended_img)
+    pool = []
+    for i in range(0, y_max - 1):
+        for j in range(0, x_max - 1):
+            pool.append(Thread(target=blend_thread, args=(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img)))
+            pool[-1].start()
+    for p in pool:
+        p.join()
+    return blended_img
+
+
+def blend_last_column_thread(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    index = i * x_max + x_max - 1
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0 :  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = i * image_np.shape[1]
+            blended_img.paste(blend(base_img, mask, 1), (t_x, t_y))
+        elif prediction_np[index] == 1 :  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = i * image_np.shape[1]
+            blended_img.paste(blend(base_img, mask, 1), (t_x, t_y))
+        else:
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = i * image_np.shape[1]
+            blended_img.paste(base_img, (t_x, t_y))
+    else:
+        t_x = blended_img.size[0] - image_np.shape[2]
+        t_y = i * image_np.shape[1]
+        blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_last_row_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    index = i * x_max + j
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0:  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = j * image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask, 1), (t_x, t_y))
+        elif prediction_np[index] == 1:  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = j * image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask, 1), (t_x, t_y))
+        else:
+            t_x = j * image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(base_img, (t_x, t_y))
+    else:
+        t_x = j * image_np.shape[2]
+        t_y = blended_img.size[1]-image_np.shape[1]
+        blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_last(image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    index = -1
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0 :  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask, 1), (t_x, t_y))
+        elif prediction_np[index] == 1:  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(blend(base_img, mask, 1), (t_x, t_y))
+        else:
+            t_x = blended_img.size[0] - image_np.shape[2]
+            t_y = blended_img.size[1]-image_np.shape[1]
+            blended_img.paste(base_img, (t_x, t_y))
+    else:
+        t_x = blended_img.size[0] - image_np.shape[2]
+        t_y = blended_img.size[1]-image_np.shape[1]
+        blended_img.paste(base_img, (t_x, t_y))
+
+
+def blend_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
+    blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
+    helvetica = ImageFont.truetype(font="arial.ttf", size=20)
+    d = ImageDraw.Draw(blended_img)
+    text_color = (0, 0, 0)
+    index = i * x_max + j
+    base_img = np_to_pil(image_np[index][:][:][:], COLOR)
+    prediction_np = ens_prediction[0]
+    if max(ens_prediction[2]) - min(ens_prediction[2]) != 0 :
+        var_norm = (ens_prediction[2][index] - min(ens_prediction[2]) ) / (max(ens_prediction[2]) - min(ens_prediction[2]))
+    else:
+        var_norm = ens_prediction[2][index]
+    var_mean = ((1-var_norm) + ens_prediction[0][index])/ 2
+
+    if valid_bit_np[index] == 1:
+        if prediction_np[index] == 0:  # AC
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  # red
+                    blended_np[k][z][1] = 0
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            blended_img.paste(blend(base_img, mask, var_mean), (j * image_np.shape[2], i * image_np.shape[1]))
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 10)
+            d.text(location, "Std: {:.2%}".format(ens_prediction[2][index]), font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 40)
+            d.text(location, "AC mean: {:.2}".format(ens_prediction[1][index]) , font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 70)
+            d.text(location, "Norm std: {:.2%}".format(var_norm) , font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 100)
+            d.text(location, "H mean: {:.2}".format(ens_prediction[3][index]) , font=helvetica, fill=text_color)
+        elif prediction_np[index] == 1:  # AD
+            for k in range(0, image_np.shape[1]):
+                for z in range(0, image_np.shape[2]):
+                    blended_np[k][z][0] = 255  #yellow
+                    blended_np[k][z][1] = 255
+                    blended_np[k][z][2] = 0
+            mask = np_to_pil(blended_np, COLOR)
+            blended_img.paste(blend(base_img, mask, var_mean), (j * image_np.shape[2], i * image_np.shape[1]))
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 10)
+            d.text(location, "Std: {:.2%}".format(ens_prediction[2][index]), font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 50)
+            d.text(location, "AD mean: {:.2}".format(ens_prediction[1][index]) , font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 90)
+            d.text(location, "Norm std: {:.2%}".format(var_norm) , font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 130)
+            d.text(location, "H mean: {:.2}".format(ens_prediction[3][index]) , font=helvetica, fill=text_color)
+        else:
+            blended_img.paste(base_img, (j * image_np.shape[2], i * image_np.shape[1]))
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 10)
+            d.text(location, "Std: {:.2%}".format(ens_prediction[2][index]), font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 50)
+            d.text(location, "H mean: {:.2}".format(ens_prediction[1][index]) , font=helvetica, fill=text_color)
+            location = (j * image_np.shape[2] + 10 , i * image_np.shape[1]+ 90)
+            d.text(location, "Norm std: {:.2%}".format(var_norm) , font=helvetica, fill=text_color)
+    else:
+        blended_img.paste(base_img, (j * image_np.shape[2], i * image_np.shape[1]))
+
+"""

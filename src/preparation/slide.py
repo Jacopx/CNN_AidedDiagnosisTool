@@ -9,13 +9,16 @@ import openslide
 import time
 import math
 from threading import Thread
-import utils
+from src.preparation import utils
 import logger as log
 from os import path
+import numpy as np
+from PIL import Image
+import cv2 as cv
+from src.parameters import *
 
 
 LVL = 0  # Level of dimensionality
-CROP_FOLDER = path.join("resources", "cropped_dataset")
 SCALE_FACTOR = 24
 
 
@@ -25,7 +28,6 @@ SCALE_FACTOR = 24
 def open_slide(slide_path):
     start_time = time.time()
     try:
-        # Create target Directory
         slide = openslide.open_slide(slide_path)
     except Exception:
         slide = None
@@ -41,18 +43,41 @@ def open_slide(slide_path):
     return slide
 
 
+def read_slide_crop(slide,x,y, crop_size):
+    start_time = time.time()
+    #log.print_debug("Converting slide to image. Requires time!")
+    image = slide.read_region((x, y), LVL, (crop_size, crop_size))
+    elapsed_time = time.time() - start_time
+    log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
+    return image
+
+
 # Convert a svs slide into a PIL.Image
 # Parameters : slide -> Openslide slide to be converted
 # Return : the converted image
 def slide_to_image(slide):
     start_time = time.time()
-    log.print_debug("Converting slide to image. Requires time!")
+    #log.print_debug("Converting slide to image. Requires time!")
     width, height = get_slide_size(slide)
     # MAX width*height = 2**29!!!!!!! IMPORTANT
     image = slide.read_region((0, 0), LVL, (width, height))
     elapsed_time = time.time() - start_time
     log.print_debug("Converted slide to image || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image
+
+
+# Convert a PIL.Image to OpenCV.Image
+# Parameters : image -> PIL.Image to be converted
+# Return : the converted image
+def image_to_cv(image):
+    start_time = time.time()
+    log.print_debug("Converting image to cv format. Requires time!")
+    np_image = np.asarray(image)
+    # Convert RGB to BGR
+    open_cv_image = cv.cvtColor(np_image, cv.COLOR_RGB2BGR)
+    elapsed_time = time.time() - start_time
+    log.print_debug("Converted image to cv || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
+    return open_cv_image
 
 
 # Resize a PIL.Image
@@ -62,7 +87,7 @@ def slide_to_image(slide):
 def resize_image_r(image, scale_factor):
     start_time = time.time()
     width, height = image.size
-    image_r = image.resize((int(width / scale_factor), int(height / scale_factor)))
+    image_r = image.resize((int(width / scale_factor), int(height / scale_factor)), Image.LANCZOS)
     elapsed_time = time.time() - start_time
     log.print_debug("Image resized || Shape: " + str(image.size) + "+ || Time Elapsed: " + str(elapsed_time))
     return image_r
@@ -75,7 +100,7 @@ def resize_image_r(image, scale_factor):
 # Return : the resized image
 def resize_image_a(image, width, height):
     start_time = time.time()
-    image_r = image.resize((int(width), int(height)))
+    image_r = image.resize((int(width), int(height)), Image.LANCZOS)
     elapsed_time = time.time() - start_time
     log.print_debug("Image resized || Time Elapsed: " + str(elapsed_time))
     return image_r
@@ -209,13 +234,14 @@ def overlap_crop_singleprocess(dataset_folder, slide_name_ex, custom_ss):
 """
 
 
-# Crop an image and save the cropped frame
+# Crop an image, resize it to a square of 224 x 224 and save it
 # Parameters : image -> PIL.Image to be cropped
 #              box -> coordinates of crop region
 #              crop_name -> string defining path name for saving image
 def custom_crop(image, box, folder, crop_name):
     crop_region = image.crop(box)
-    utils.save_image(crop_region, folder, crop_name)
+    resized_crop = resize_image_a(crop_region,224,224)
+    utils.save_image(resized_crop, folder, crop_name)
     # crop_region.save(crop_name)
 
 

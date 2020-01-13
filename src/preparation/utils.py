@@ -24,6 +24,7 @@ COLOR = "RGB"  # (3x8-bit pixels, true color)
 COLOR_ALPHA = "RGBA"  # (4x8-bit pixels, true color with transparency mask)
 PRINT_STD = "true"
 
+font_ = os.path.join(RESOURCE_FOLDER,"arial.ttf")
 
 def test_folder():
     make_folder(RESOURCE_FOLDER)
@@ -264,7 +265,7 @@ def blend_last_gradient(image_np, valid_bit_np, ens_prediction, blended_img, gra
 
 def blend_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
-    helvetica = ImageFont.truetype(font="./arial.ttf", size=20)
+    helvetica = ImageFont.truetype(font=font_, size=20)
     d = ImageDraw.Draw(blended_img)
     index = i * x_max + j
     base_img = np_to_pil(image_np[index][:][:][:], COLOR)
@@ -442,7 +443,7 @@ def blend_last_multiple_gradient(image_np, valid_bit_np, ens_prediction, blended
 
 def blend_multiple_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
-    helvetica = ImageFont.truetype(font="arial.ttf", size=20)
+    helvetica = ImageFont.truetype(font=font_, size=20)
     d = ImageDraw.Draw(blended_img)
     index = i * x_max + j
     base_img = np_to_pil(image_np[index][:][:][:], COLOR)

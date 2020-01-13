@@ -86,9 +86,9 @@ def make_prediction(path_list, crop_size, dr, iterations):
             slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
             valid_bit_np = dm.read_blob(basename + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
             if iterations == 1:
-                image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, False, crop_size)
+                image = utils.blend_np_multiple_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, False, crop_size)
             else:
-                image = utils.blend_np_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, True, crop_size)
+                image = utils.blend_np_multiple_gradient(np_flatten_image, ens_predictions_np, valid_bit_np, slide_size, True, crop_size)
             utils.save_image(image, RESOURCE_FOLDER, basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient")
             elapsed_time = time.time() - start_time
             log.print_debug(basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient" + ": " + str(elapsed_time))
@@ -132,10 +132,10 @@ def produce_images():
                             iterations) + "_multiple_gradient" + ": " + str(elapsed_time))
                     gc.collect()
 
+
 def main():
-    #make_prediction(["D:\\users\\jacopo\\Documenti\\Poli\\BioInfoPrj\\CNN_AidedDiagnosisTool\\resources\\DATASET_ROI\\MAP\\map_3.svs", "D:\\users\\jacopo\\Documenti\\Poli\\BioInfoPrj\\CNN_AidedDiagnosisTool\\resources\\DATASET_ROI\\MAP\\map_4.svs"], 224, 0.5, 10)
-    #produce_images()
-    utils.test_folder()
+    make_prediction(['dataset/MAP/map_4.svs'], 4480, 0.5, 1)
+    # utils.test_folder()
     return 0
 
 

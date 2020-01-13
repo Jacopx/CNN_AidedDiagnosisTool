@@ -135,7 +135,7 @@ def produce_images():
 def main():
     #make_prediction(["D:\\users\\jacopo\\Documenti\\Poli\\BioInfoPrj\\CNN_AidedDiagnosisTool\\resources\\DATASET_ROI\\MAP\\map_3.svs", "D:\\users\\jacopo\\Documenti\\Poli\\BioInfoPrj\\CNN_AidedDiagnosisTool\\resources\\DATASET_ROI\\MAP\\map_4.svs"], 224, 0.5, 10)
     #produce_images()
-
+    utils.test_folder()
     return 0
 
 

@@ -27,7 +27,7 @@ SET_FOLDER = path.join("resources", "cropped_dataset","dataset_train_test",str(I
 DUMMY_SET_FOLDER = path.join("resources", "cropped_dataset","dummyset_train_test",str(INPUT_SIZE))
 MODEL_FOLDER = path.join("resources", "models")
 SUMMARY_FOLDER = path.join("resources", "models","summary")
-#PREDICTION_FOLDER = path.join("resources", "predictions",str(DROP_RATE))
+PREDICTION_FOLDER = path.join("resources", "predictions")
 
 
 ###############################################################

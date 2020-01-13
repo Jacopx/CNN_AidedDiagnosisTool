@@ -24,6 +24,17 @@ COLOR = "RGB"  # (3x8-bit pixels, true color)
 COLOR_ALPHA = "RGBA"  # (4x8-bit pixels, true color with transparency mask)
 PRINT_STD = "true"
 
+
+def test_folder():
+    make_folder(RESOURCE_FOLDER)
+    make_folder(DATASET_FOLDER)
+    make_folder(MAP_FOLDER)
+    make_folder(MODEL_FOLDER)
+    make_folder(PREDICTION_FOLDER)
+    drop_rates = [0.01, 0.1, 0.5]
+    for dr in drop_rates:
+        make_folder(path.join("resources", "predictions", str(dr)))
+
 def make_folder(folder_name):
     try:
         # Create target Directory

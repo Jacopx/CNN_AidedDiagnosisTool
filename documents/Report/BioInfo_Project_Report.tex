@@ -34,6 +34,61 @@
 
 \newpage
 % STARTING DOCUMENT
+\section{Description of the assignment of the project}
+\subsection{Digital pathology: introduction to the problem}
+In digital pathology a diagnosis is carried out by analysing histopathological samples which are pieces of tissues extracted via surgical operation. Specimens are typically stained with H\&E (haematoxylin and eosin) so that different structures come in different shades between blue (haematoxylin binds to cell nuclei as they are negatively charged) and pink (eosin binds to extracellular matrix and cytoplasm as they are positively charged) for better distinguish between them. Nowadays digital slides are obtained by scanning specimens placed on conventional glass slides; such multi-resolution slides are called WSI (Whole Slide Images) and can be elaborated numerically, enabling different applications.\\
+It is well known that molecular expression of diseases tend to manifest in differences in the tissue architecture and morphology: the traditional approach consists in the visual examination of samples, carried out by a clinician, with the aim of detecting abnormalities related to a certain disease (i.e. if a tissue is cancerous or not). Visual examination is time consuming, prone to inter-reader and intra-reader variability and non-reproducible: these issues can be overcome making available to the pathologists a tool that supports them during the visual evaluation.\\
+Computed aided diagnosis systems (CAD) are thought to help clinicians in everyday tasks: the clinician is not put aside, but yet supported by tools that can, among all, improve the prediction of disease aggressiveness and of the patient outcome by suggesting details about, for example, medical images without substituting the clinician in the final decision.
+\subsection{The focus of the project and clinical insights}
+The focus of the project was developing a software able to produce an attention-map for cancer detection that drives pathologists’ attention to certain areas of the slice that might be pathological and might require further analysis.\\
+Adenocarcinoma and adenoma tissue samples were considered: adenocarcinoma is a cancerous tumour that interests epithelial tissue (i.e. tissue that interests inner and outer surface cavities in many organs and blood vessels) that has glandular origin and/or characteristics. On the other hand, adenoma is a benign tumour, but should be treated as pre-cancerous and requires attention because might turn into adenocarcinoma.
+Such clinical aspects were kept into constant consideration during the development of the project: there is a huge variability between the appearance of tissues and intrinsic uncertainty that was modelled with an approximation of a Bayesian CNN trained with WSI images representing AD tissue (short for adenoma, a benign tumour of epithelial tissue with glandular origin or characteristics), AC tissue (short for adenocarcinoma, a malign tumour) and healthy tissue.
+\\
+\section{Theory about CNNs focused on the application outline}
+Neural networks are a machine learning approach that relies on several computational units, called neurons, differently interconnected via weights as NNs take inspiration from the way the brain is organised: weights stand for biological synapses. The knowledge of the network is preserved in the weights and the behaviour of the network is related to its hierarchical architecture: the learning process consists in adjusting the weights extracting a mathematical model that fits training data giving as output a classification result or a prediction.\\
+Every deep learning network begins with the assumption of random initialization of weights and, at each iteration, data is propagated through the network to compute the output.\\ There are many challenges in the automatic analysis of digital pathology images, as said before, such as the variability of the morphology of the sample due to the pathology and to the preparation of slides and the variations in staining.
+The variations between patients and clinical conditions have always made tedious to find handcrafted features that can be integrated in a system making it robust, efficient and reliable : deep learning methods overcome these issues deriving a feature space from the data itself and gaining the capability of generalization when unseen data is presented to the network.\\
+CNNs (Convolutional Neural Networks) are neural networks where the local connectivity pattern between neurons is inspired by the organization of the animal visual cortex and information is processed similarly to how the brain would do; cortical neurons respond to stimuli in a specific region of the space known as receptive field and this behaviour can be mathematically modelled via convolutions.\\ The 3 characteristic layers of CNN are the convolutional layers, the non-linear layers and pooling layers (details are given in section ….). As hidden units are connected to local receptive fields and share weights, the input can have a high dimension without resulting in many parameters: these parameters are learned during the training via the backpropagation algorithm. Each hidden layer is dedicated to identifying a multiple feature of the input: low-level features are condensed in the deepest layers while problem-specific features belong to last layers (with no pre-existing assumptions about the particular tasks or dataset in form of encoded domain-specific information); such characteristics allow the network to be more flexible when extracting, during the training procedure, different combination of small patterns eventually combining them for the aim of the network. Regarding the training procedure, the backpropagation algorithm is the most used method and consists in the update of the weights, initially random initialised, basing on a loss term that is computed with the output given by the network and the desired output. \\
+\begin{itemize}
+	\item Input features propagates in through the network in the forward direction computing the output and the loss associated with the parameters;
+	\item The training loss is derivate with respect to the weights and computed back towards the input.
+\end{itemize}
+This is an iterative procedure that is repeated until a certain stopping condition is reached: the tuning of the parameters of the backpropagation is proportional to the size of data.
+\subsection{Bayesian CNNs}
+The risk of overfitting when the network is not trained on a large dataset and the falsely overconfidence in the prediction related to the absence of a measure of uncertainty are typical drawbacks of conventional deep learning methods.
+Bayesian CNNs were thought to handle these problems and considered during this project: they are based on the Bayes’ theorem that is the fundamental of Bayesian inference, a way of quantifying model uncertainty. According to this, each observation is an opportunity to update the beliefs about a given deep learning model. Moreover, Bayesian CNNs are robust to outliers and are key solution when the lack of a large amount of data can result in unreliable networks. \cite{1}
+\subsection{Bayes' theorem}
+The Bayes’ rule shows how the degree of belief in a model (posterior function, P($\theta \mid D$) is related to the likelihood of the occurrence of the data (P($D \mid \theta$)), to the knowledge about the data (the prior, P($\theta$)) and to the evidence (marginal likelihood, P(D)). EQUAZIONE \\
+The posterior function is the probability distribution of interest that summarizes the knowledge about the model parameters given data and needs to be estimated given that the aim is obtaining the parameters $\theta$ of the model in order to get the correct output for a given input. The prediction of new observations is made through model update on the posterior predictive distribution, the neural network of interest being a conditional model parameterized by the weights.
+The exact Bayesian inference is intractable, and Bayesian CNNs come with a high computational cost: the estimation can only be approximated via several method.\\
+Stochastic regularization techniques like dropout regularization can be used to approximate inference in Bayesian models without resulting in excessive computational costs \cite{1}.
 
+\subsection{Dropout}
+Dropout is a regularization technique that prevents overfitting and improve generalizability by randomly ‘dropping out’ (i.e. inactivating) units of a neural network with a certain probability: for each training sample different units are dropped out, resulting in a training procedure on reduced networks. \cite{2}
+\\ When the dropout is applied at both training and test time, we have the Monte Carlo dropout: setting the dropout rate and the number of iterations, the same element of the dataset is presented to the network different times and, for each presentation, a different result is obtained. At test time the prediction is no longer deterministic but depends on which nodes is randomly choose to be kept: given a same datapoint, the model can predict different values each time. The primary goal of Monte Carlo dropout is to generate random predictions and interpret them as samples from a probabilistic distribution. \cite{3}
+\section{Detailed description of the method}
+\subsection{Dataset creation}
+
+\subsection{The network architecture}
+\subsection{Training the network}
+\subsection{Python code}
+\subsection{Implementation}
+\section{Description of the results}
+\subsection{GUI and visualization}
+\section{Results discussion}
+\section{Future development}
+\newpage
+\begin{thebibliography}{9}
+
+	\bibitem{1}
+	Yarin Gal, Zoubin Ghahramani.	\textit{Dropout as a Bayesin Approximation: Representing Model Uncertainty in Deep Learning}, International Converence On Machine Learning, 2016.
+
+	\bibitem{2}
+	Harshita Sharmaa, Norman Zerbe, Iris Klempert, Olaf Hellwich, Peter Hufnagl. \textit{Deep convolutional neural networks for automatic classification of gastric carcinoma using whole slide images in digital histopathology}. Computerized Medical Imaging and Graphics, Volume 61, November 2017, Pages 2-13.
+
+	\bibitem{3} Yongchan Kwon, Joong-Ho Won, Beom Joon Kim, Myunghee Cho Paik. \textit{Uncertainty quantification using Bayesian neural networks in classification: Application to ischemic stroke lesions segmentation}. Computer Science, 2018.
+
+
+\end{thebibliography}
 
 \end{document}

@@ -148,6 +148,7 @@ def produce_images():
 
 def main():
     make_prediction(['.\\resources\\DATASET_ROI\\MAP\\map_4.svs'], 2240, 0.5, 1)
+
     # utils.test_folder()
     return 0
 

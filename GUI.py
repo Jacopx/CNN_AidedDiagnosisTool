@@ -5,9 +5,7 @@
 #                                usage: GUI.py                              *
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 import sys
-import time
-import multiprocessing
-import threading
+import src.preparation.utils
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 import main
@@ -113,13 +111,14 @@ class Ui_MainWindow(object):
 
         # Single image selected a new process is started
         if len(file_name[0]) > 0:
-            main.make_prediction(file_name[0], 2240, 0.5, 1)
+            out_file = main.make_prediction(file_name[0], 2240, 0.5, 1)
+            self.show_img(out_file[0][1])
             # p = multiprocessing.Process(target=self.controller, args=(file_name[0], outfile))
 
     # Process
     def controller(self, in_file, out_file):
         out_file = main.make_prediction(in_file, 2240, 0.5, 1)
-        self.show_img(out_file)
+        self.show_img(out_file[0])
         return
 
     # Show image
@@ -151,6 +150,7 @@ class Ui_MainWindow(object):
 
 
 if __name__ == "__main__":
+    src.preparation.utils.test_folder()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

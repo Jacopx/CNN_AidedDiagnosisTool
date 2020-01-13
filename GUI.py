@@ -106,14 +106,14 @@ class Ui_MainWindow(object):
     def open_file(self):
         file_name = QFileDialog.getOpenFileNames()
 
-        # Using manager for a sharing variable
-        manager = multiprocessing.Manager()
-        outfile = manager.list()
+        # # Using manager for a sharing variable
+        # manager = multiprocessing.Manager()
+        # outfile = manager.list()
 
         # Single image selected a new process is started
         if len(file_name[0]) > 0:
-            p = multiprocessing.Process(target=self.controller, args=(file_name[0], outfile))
-            p.start()
+            main.make_prediction(file_name[0], 2240, 0.5, 1)
+            # p = multiprocessing.Process(target=self.controller, args=(file_name[0], outfile))
 
 
     # Process

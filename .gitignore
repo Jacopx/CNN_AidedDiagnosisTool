@@ -4,7 +4,7 @@ dataset/*
 crop/*
 !crop/.waste
 resources/*
-
+!resources/legend.jpg
 .DS_store
 
 ## Core latex/pdflatex auxiliary files:

@@ -165,7 +165,7 @@ class Ui_MainWindow(object):
             self.mask_button.setDisabled(False)
             self.reload_button.setDisabled(False)
             self.main_label.setText(self.out_file[0][1])
-            self.legend_viewer.setPhoto(QtGui.QPixmap(self.out_file[0][1]))
+            self.legend_viewer.setPhoto(QtGui.QPixmap('resources/legend.jpg'))
 
     # Change from mask and no-mask rapidly
     def mask_change(self):

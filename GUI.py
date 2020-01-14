@@ -121,8 +121,8 @@ class Ui_MainWindow(object):
         if len(file_name[0]) > 0:
             crop = int(self.crop_combo.currentText())
             drop = float(self.dropout_combo.currentText())
-            self.out_file = main.make_prediction(file_name[0], crop, drop, 1)
 
+            self.out_file = main.make_prediction(file_name[0], crop, drop, 1)
             self.show_img(self.out_file[0][1])
 
     def mask_change(self):
@@ -144,10 +144,9 @@ class Ui_MainWindow(object):
         if self.viewer.dragMode() == QtWidgets.QGraphicsView.NoDrag:
             self.editPixInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
-
     # Clear image
     def clear_img(self):
-        self.image.setPixmap(QtGui.QPixmap(""))
+        self.viewer.setPhoto()
 
     # Save file to PNG
     def save_file(self):

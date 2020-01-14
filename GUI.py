@@ -19,6 +19,7 @@ class Ui_MainWindow(object):
     def __init__(self):
         self.setupUi(MainWindow)
         self.define_actions()
+        self.fill_combo()
         self.mask = False
         self.out_file = []
 
@@ -29,7 +30,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 1921, 41))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 1921, 51))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -40,10 +41,26 @@ class Ui_MainWindow(object):
         self.mask_button = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.mask_button.setObjectName("mask_button")
         self.horizontalLayout.addWidget(self.mask_button)
+        self.dropout_combo = QtWidgets.QComboBox(self.horizontalLayoutWidget)
+        self.dropout_combo.setObjectName("dropout_combo")
+        self.horizontalLayout.addWidget(self.dropout_combo)
+        self.crop_combo = QtWidgets.QComboBox(self.horizontalLayoutWidget)
+        self.crop_combo.setObjectName("crop_combo")
+        self.horizontalLayout.addWidget(self.crop_combo)
+        self.main_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.main_label.setObjectName("main_label")
+        self.horizontalLayout.addWidget(self.main_label)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.image = QtWidgets.QLabel(self.centralwidget)
-        self.image.setGeometry(QtCore.QRect(0, 40, 1920, 990))
+        self.image.setGeometry(QtCore.QRect(0, 89, 1920, 941))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.image.sizePolicy().hasHeightForWidth())
+        self.image.setSizePolicy(sizePolicy)
+        self.image.setText("")
+        self.image.setAlignment(QtCore.Qt.AlignCenter)
         self.image.setObjectName("image")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -96,6 +113,10 @@ class Ui_MainWindow(object):
         self.actionOpen.triggered.connect(self.open_file)
         self.actionSavePNG.triggered.connect(self.save_file)
 
+    def fill_combo(self):
+        self.crop_combo.addItems(['2240', '4480'])
+        self.dropout_combo.addItems(['0.1', '0.01', '0.5'])
+
     # Open selected file after actionOpen trigger
     # Single file selection drive to a single evaluation.
     # Using multiple selection will start the evaluation of the first immidiately and than the others
@@ -104,7 +125,9 @@ class Ui_MainWindow(object):
 
         # Single image selected a new process is started
         if len(file_name[0]) > 0:
-            self.out_file = main.make_prediction(file_name[0], 2240, 0.5, 1)
+            crop = int(self.crop_combo.currentText())
+            drop = float(self.dropout_combo.currentText())
+            self.out_file = main.make_prediction(file_name[0], crop, drop, 1)
             self.show_img(self.out_file[0][1])
 
     def mask_change(self):
@@ -126,6 +149,9 @@ class Ui_MainWindow(object):
             pix = pix.scaledToHeight(height)
         elif pix.width() >= width:
             pix = pix.scaledToWidth(width)
+        else:
+            pix = pix.scaledToHeight(720)
+            pix = pix.scaledToWidth(1280)
 
         self.image.setPixmap(pix)
 

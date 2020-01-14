@@ -20,7 +20,7 @@
       <x>0</x>
       <y>0</y>
       <width>1921</width>
-      <height>41</height>
+      <height>51</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -35,6 +35,19 @@
       <widget class="QPushButton" name="mask_button">
        <property name="text">
         <string>Mask</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="dropout_combo"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="crop_combo"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="main_label">
+       <property name="text">
+        <string>TextLabel</string>
        </property>
       </widget>
      </item>
@@ -57,13 +70,22 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>40</y>
+      <y>89</y>
       <width>1920</width>
-      <height>990</height>
+      <height>941</height>
      </rect>
     </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
     <property name="text">
-     <string>Image</string>
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>

@@ -8,10 +8,10 @@ import sys
 import src.preparation.utils
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
+import PhotoViewer
 import main
 
 COOL_DOWN_TIME = 1
-
 
 # MainWindows class
 class Ui_MainWindow(object):
@@ -72,10 +72,15 @@ class Ui_MainWindow(object):
         self.main_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
         self.main_label.setObjectName("main_label")
         self.horizontalLayout.addWidget(self.main_label)
+
+        self.legend_viewer = PhotoViewer.PhotoViewer(self.centralwidget)
+        self.legend_viewer.setObjectName("legend_viewer")
+        self.horizontalLayout.addWidget(self.legend_viewer)
+
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
 
-        self.viewer = PhotoViewer(self.centralwidget)
+        self.viewer = PhotoViewer.PhotoViewer(self.centralwidget)
         self.viewer.setGeometry(QtCore.QRect(0, 50, 1941, 981))
         self.viewer.setObjectName("viewer")
 
@@ -134,18 +139,18 @@ class Ui_MainWindow(object):
         self.actionOpen.triggered.connect(self.open_file)
         # self.actionSavePNG.triggered.connect(self.save_file)
 
+    # Fill the combobox with proper values
     def fill_combo(self):
         self.crop_combo.addItems(['2240', '4480'])
         self.dropout_combo.addItems(['0.1', '0.01', '0.5'])
         self.iter_combo.addItems(['1', '10', '100', '1000', '10000'])
 
-    # Open selected file after actionOpen trigger
-    # Single file selection drive to a single evaluation.
-    # Using multiple selection will start the evaluation of the first immidiately and than the others
+    # Function triggered when Open command is executed, save the path in global var
     def open_file(self):
         self.file_name = QFileDialog.getOpenFileNames()
         self.generate()
 
+    # Invoked after OPEN or RELOAD are called, actually open the the file and enable the buttons
     def generate(self):
         # Single image selected a new process is started
         if len(self.file_name[0]) > 0:
@@ -160,7 +165,9 @@ class Ui_MainWindow(object):
             self.mask_button.setDisabled(False)
             self.reload_button.setDisabled(False)
             self.main_label.setText(self.out_file[0][1])
+            self.legend_viewer.setPhoto(QtGui.QPixmap(self.out_file[0][1]))
 
+    # Change from mask and no-mask rapidly
     def mask_change(self):
         if self.mask:
             self.show_img(self.out_file[0][0])
@@ -175,115 +182,25 @@ class Ui_MainWindow(object):
     def show_img(self, path):
         self.viewer.setPhoto(QtGui.QPixmap(path))
 
+    # Activate drag mode
     def pixInfo(self):
         self.viewer.toggleDragMode()
 
+    # Active image pan
     def photoClicked(self, pos):
         if self.viewer.dragMode() == QtWidgets.QGraphicsView.NoDrag:
             self.editPixInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
-    # Clear image
+    # Clear image, deactive buttons and restore label
     def clear_img(self):
         self.clear_button.setDisabled(True)
         self.mask_button.setDisabled(True)
         self.reload_button.setDisabled(True)
         self.main_label.setText('')
         self.viewer.setPhoto()
+        self.legend_viewer.setPhoto()
 
-    # # Save file to PNG
-    # def save_file(self):
-    #     msg = QMessageBox()
-    #     msg.setWindowTitle("Save file")
-    #     msg.setText("Save file to PNG")
-    #     msg.setInformativeText("The file will be saved in: ")
-    #     msg.setIcon(QMessageBox.Information)
-    #     msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-    #     msg.setDefaultButton(QMessageBox.Ok)
-    #     msg.buttonClicked.connect(self.save_popup)
-    #     x = msg.exec_()
-    #
-    # # Manage selection of the user
-    # def save_popup(self, i):
-    #     if i.text() == 'OK':
-    #         print('File saved...')
-    #     else:
-    #         print('File NOT saved')
-
-
-class PhotoViewer(QtWidgets.QGraphicsView):
-    photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
-
-    def __init__(self, parent):
-        super(PhotoViewer, self).__init__(parent)
-        self._zoom = 0
-        self._empty = True
-        self._scene = QtWidgets.QGraphicsScene(self)
-        self._photo = QtWidgets.QGraphicsPixmapItem()
-        self._scene.addItem(self._photo)
-        self.setScene(self._scene)
-        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
-        self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
-        self.setFrameShape(QtWidgets.QFrame.NoFrame)
-
-    def hasPhoto(self):
-        return not self._empty
-
-    def fitInView(self, scale=True):
-        rect = QtCore.QRectF(self._photo.pixmap().rect())
-        if not rect.isNull():
-            self.setSceneRect(rect)
-            if self.hasPhoto():
-                unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
-                self.scale(1 / unity.width(), 1 / unity.height())
-                viewrect = self.viewport().rect()
-                scenerect = self.transform().mapRect(rect)
-                factor = min(viewrect.width() / scenerect.width(),
-                             viewrect.height() / scenerect.height())
-                self.scale(factor, factor)
-            self._zoom = 0
-
-    def setPhoto(self, pixmap=None):
-        self._zoom = 0
-        if pixmap and not pixmap.isNull():
-            self._empty = False
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
-            self._photo.setPixmap(pixmap)
-        else:
-            self._empty = True
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-            self._photo.setPixmap(QtGui.QPixmap())
-        self.fitInView()
-
-    def wheelEvent(self, event):
-        if self.hasPhoto():
-            if event.angleDelta().y() > 0:
-                factor = 1.25
-                self._zoom += 1
-            else:
-                factor = 0.8
-                self._zoom -= 1
-            if self._zoom > 0:
-                self.scale(factor, factor)
-            elif self._zoom == 0:
-                self.fitInView()
-            else:
-                self._zoom = 0
-
-    def toggleDragMode(self):
-        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        elif not self._photo.pixmap().isNull():
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
-
-    def mousePressEvent(self, event):
-        if self._photo.isUnderMouse():
-            self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
-        super(PhotoViewer, self).mousePressEvent(event)
-
-
+# MAIN
 if __name__ == "__main__":
     src.preparation.utils.test_folder()
     app = QtWidgets.QApplication(sys.argv)

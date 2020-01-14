@@ -32,6 +32,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="reload_button">
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="mask_button">
        <property name="text">
         <string>Mask</string>
@@ -39,10 +46,34 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="drop_label">
+       <property name="text">
+        <string>Dropout:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="dropout_combo"/>
      </item>
      <item>
+      <widget class="QLabel" name="crop_label">
+       <property name="text">
+        <string>Crop:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="crop_combo"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="iter_label">
+       <property name="text">
+        <string>Iteration:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="iter_combo"/>
      </item>
      <item>
       <widget class="QLabel" name="main_label">

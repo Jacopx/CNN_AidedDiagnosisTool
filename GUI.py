@@ -22,6 +22,7 @@ class Ui_MainWindow(object):
         self.fill_combo()
         self.mask = False
         self.out_file = []
+        self.file_name = ''
 
     # AUTO GENERATED GRAPHICAL
     def setupUi(self, MainWindow):
@@ -35,18 +36,39 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
+
         self.clear_button = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.clear_button.setObjectName("clear_button")
         self.horizontalLayout.addWidget(self.clear_button)
         self.mask_button = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.mask_button.setObjectName("mask_button")
         self.horizontalLayout.addWidget(self.mask_button)
+        self.reload_button = QtWidgets.QPushButton(self.horizontalLayoutWidget)
+        self.reload_button.setObjectName("reload_button")
+        self.horizontalLayout.addWidget(self.reload_button)
+
+        self.clear_button.setDisabled(True)
+        self.mask_button.setDisabled(True)
+        self.reload_button.setDisabled(True)
+
+        self.drop_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.drop_label.setObjectName("drop_label")
+        self.horizontalLayout.addWidget(self.drop_label)
         self.dropout_combo = QtWidgets.QComboBox(self.horizontalLayoutWidget)
         self.dropout_combo.setObjectName("dropout_combo")
         self.horizontalLayout.addWidget(self.dropout_combo)
+        self.crop_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.crop_label.setObjectName("crop_label")
+        self.horizontalLayout.addWidget(self.crop_label)
         self.crop_combo = QtWidgets.QComboBox(self.horizontalLayoutWidget)
         self.crop_combo.setObjectName("crop_combo")
         self.horizontalLayout.addWidget(self.crop_combo)
+        self.iter_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.iter_label.setObjectName("iter_label")
+        self.horizontalLayout.addWidget(self.iter_label)
+        self.iter_combo = QtWidgets.QComboBox(self.horizontalLayoutWidget)
+        self.iter_combo.setObjectName("iter_combo")
+        self.horizontalLayout.addWidget(self.iter_combo)
         self.main_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
         self.main_label.setObjectName("main_label")
         self.horizontalLayout.addWidget(self.main_label)
@@ -69,16 +91,16 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
         self.actionOpen = QtWidgets.QAction(MainWindow)
         self.actionOpen.setObjectName("actionOpen")
-        self.actionSavePNG = QtWidgets.QAction(MainWindow)
-        self.actionSavePNG.setObjectName("actionSavePNG")
+        # self.actionSavePNG = QtWidgets.QAction(MainWindow)
+        # self.actionSavePNG.setObjectName("actionSavePNG")
         self.actionQuit = QtWidgets.QAction(MainWindow)
         self.actionQuit.setObjectName("actionQuit")
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionSavePNG)
-        self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
         self.menubar.addAction(self.menuFile.menuAction())
+        # self.menuFile.addAction(self.actionSavePNG)
+        # self.menuFile.addSeparator()
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -88,13 +110,17 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.clear_button.setText(_translate("MainWindow", "Clear"))
         self.mask_button.setText(_translate("MainWindow", "Mask"))
+        self.reload_button.setText(_translate("MainWindow", "Reload"))
+        self.drop_label.setText(_translate("MainWindow", "Dropout:"))
+        self.crop_label.setText(_translate("MainWindow", "Crop:"))
+        self.iter_label.setText(_translate("MainWindow", "Iteration:"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionOpen.setText(_translate("MainWindow", "Open..."))
         self.actionOpen.setStatusTip(_translate("MainWindow", "Open a file"))
         self.actionOpen.setShortcut(_translate("MainWindow", "Ctrl+O"))
-        self.actionSavePNG.setText(_translate("MainWindow", "Save as PNG"))
-        self.actionSavePNG.setStatusTip(_translate("MainWindow", "Save map with highlights in PNG format"))
-        self.actionSavePNG.setShortcut(_translate("MainWindow", "Ctrl+S"))
+        # self.actionSavePNG.setText(_translate("MainWindow", "Save as PNG"))
+        # self.actionSavePNG.setStatusTip(_translate("MainWindow", "Save map with highlights in PNG format"))
+        # self.actionSavePNG.setShortcut(_translate("MainWindow", "Ctrl+S"))
         self.actionQuit.setText(_translate("MainWindow", "Quit"))
 
     # Function to define correlations to actions
@@ -102,29 +128,37 @@ class Ui_MainWindow(object):
         # Buttons
         self.clear_button.clicked.connect(self.clear_img)
         self.mask_button.clicked.connect(self.mask_change)
+        self.reload_button.clicked.connect(self.generate)
 
         # Menu Bar
         self.actionOpen.triggered.connect(self.open_file)
-        self.actionSavePNG.triggered.connect(self.save_file)
+        # self.actionSavePNG.triggered.connect(self.save_file)
 
     def fill_combo(self):
         self.crop_combo.addItems(['2240', '4480'])
         self.dropout_combo.addItems(['0.1', '0.01', '0.5'])
+        self.iter_combo.addItems(['1', '10', '100', '1000', '10000'])
 
     # Open selected file after actionOpen trigger
     # Single file selection drive to a single evaluation.
     # Using multiple selection will start the evaluation of the first immidiately and than the others
     def open_file(self):
-        file_name = QFileDialog.getOpenFileNames()
+        self.file_name = QFileDialog.getOpenFileNames()
+        self.generate()
 
+    def generate(self):
         # Single image selected a new process is started
-        if len(file_name[0]) > 0:
+        if len(self.file_name[0]) > 0:
             crop = int(self.crop_combo.currentText())
             drop = float(self.dropout_combo.currentText())
+            iteration = int(self.iter_combo.currentText())
 
-            self.out_file = main.make_prediction(file_name[0], crop, drop, 1)
+            self.out_file = main.make_prediction(self.file_name[0], crop, drop, iteration)
             self.show_img(self.out_file[0][1])
             self.mask = True
+            self.clear_button.setDisabled(False)
+            self.mask_button.setDisabled(False)
+            self.reload_button.setDisabled(False)
             self.main_label.setText(self.out_file[0][1])
 
     def mask_change(self):
@@ -150,26 +184,30 @@ class Ui_MainWindow(object):
 
     # Clear image
     def clear_img(self):
+        self.clear_button.setDisabled(True)
+        self.mask_button.setDisabled(True)
+        self.reload_button.setDisabled(True)
+        self.main_label.setText('')
         self.viewer.setPhoto()
 
-    # Save file to PNG
-    def save_file(self):
-        msg = QMessageBox()
-        msg.setWindowTitle("Save file")
-        msg.setText("Save file to PNG")
-        msg.setInformativeText("The file will be saved in: ")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-        msg.setDefaultButton(QMessageBox.Ok)
-        msg.buttonClicked.connect(self.save_popup)
-        x = msg.exec_()
-
-    # Manage selection of the user
-    def save_popup(self, i):
-        if i.text() == 'OK':
-            print('File saved...')
-        else:
-            print('File NOT saved')
+    # # Save file to PNG
+    # def save_file(self):
+    #     msg = QMessageBox()
+    #     msg.setWindowTitle("Save file")
+    #     msg.setText("Save file to PNG")
+    #     msg.setInformativeText("The file will be saved in: ")
+    #     msg.setIcon(QMessageBox.Information)
+    #     msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
+    #     msg.setDefaultButton(QMessageBox.Ok)
+    #     msg.buttonClicked.connect(self.save_popup)
+    #     x = msg.exec_()
+    #
+    # # Manage selection of the user
+    # def save_popup(self, i):
+    #     if i.text() == 'OK':
+    #         print('File saved...')
+    #     else:
+    #         print('File NOT saved')
 
 
 class PhotoViewer(QtWidgets.QGraphicsView):

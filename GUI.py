@@ -134,18 +134,18 @@ class Ui_MainWindow(object):
         self.actionOpen.triggered.connect(self.open_file)
         # self.actionSavePNG.triggered.connect(self.save_file)
 
+    # Fill the combobox with proper values
     def fill_combo(self):
         self.crop_combo.addItems(['2240', '4480'])
         self.dropout_combo.addItems(['0.1', '0.01', '0.5'])
         self.iter_combo.addItems(['1', '10', '100', '1000', '10000'])
 
-    # Open selected file after actionOpen trigger
-    # Single file selection drive to a single evaluation.
-    # Using multiple selection will start the evaluation of the first immidiately and than the others
+    # Function triggered when Open command is executed, save the path in global var
     def open_file(self):
         self.file_name = QFileDialog.getOpenFileNames()
         self.generate()
 
+    # Invoked after OPEN or RELOAD are called, actually open the the file and enable the buttons
     def generate(self):
         # Single image selected a new process is started
         if len(self.file_name[0]) > 0:
@@ -161,6 +161,7 @@ class Ui_MainWindow(object):
             self.reload_button.setDisabled(False)
             self.main_label.setText(self.out_file[0][1])
 
+    # Change from mask and no-mask rapidly
     def mask_change(self):
         if self.mask:
             self.show_img(self.out_file[0][0])
@@ -175,14 +176,16 @@ class Ui_MainWindow(object):
     def show_img(self, path):
         self.viewer.setPhoto(QtGui.QPixmap(path))
 
+    # Activate drag mode
     def pixInfo(self):
         self.viewer.toggleDragMode()
 
+    # Active image pan
     def photoClicked(self, pos):
         if self.viewer.dragMode() == QtWidgets.QGraphicsView.NoDrag:
             self.editPixInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
-    # Clear image
+    # Clear image, deactive buttons and restore label
     def clear_img(self):
         self.clear_button.setDisabled(True)
         self.mask_button.setDisabled(True)
@@ -190,7 +193,7 @@ class Ui_MainWindow(object):
         self.main_label.setText('')
         self.viewer.setPhoto()
 
-
+# MAIN
 if __name__ == "__main__":
     src.preparation.utils.test_folder()
     app = QtWidgets.QApplication(sys.argv)

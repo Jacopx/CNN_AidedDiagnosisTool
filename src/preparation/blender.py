@@ -6,6 +6,7 @@ from threading import Thread
 from src.parameters import *
 from math import ceil
 from colour import Color
+import math
 
 
 BLACK_WHITE = "1"  # (1-bit pixels, black and white, stored with one pixel per byte)
@@ -642,7 +643,7 @@ def blend_last_column_std_bigradient_thread(i, x_max, image_np, valid_bit_np, en
         mask = np_to_pil(blended_np, COLOR)
         t_x = blended_img.size[0] - image_np.shape[2]
         t_y = i * image_np.shape[1]
-        blended_img.paste(blend(base_img, mask, 0.7, var_mean), (t_x, t_y))
+        blended_img.paste(blend(base_img, mask, 0.5, var_mean), (t_x, t_y))
     else:
         color = get_prob_color_bigradient(gradient[2], 1)
         blended_np[:, :, 0].fill(color[0])
@@ -675,7 +676,7 @@ def blend_last_row_std_bigradient_thread(i, j, x_max, image_np, valid_bit_np, en
         mask = np_to_pil(blended_np, COLOR)
         t_x = j * image_np.shape[2]
         t_y = blended_img.size[1] - image_np.shape[1]
-        blended_img.paste(blend(base_img, mask, 0.7, var_mean), (t_x, t_y))
+        blended_img.paste(blend(base_img, mask, 0.5, var_mean), (t_x, t_y))
     else:
         color = get_prob_color_bigradient(gradient[2], 1)
         blended_np[:, :, 0].fill(color[0])
@@ -707,7 +708,7 @@ def blend_last_std_bigradient(image_np, valid_bit_np, ens_prediction, blended_im
         mask = np_to_pil(blended_np, COLOR)
         t_x = blended_img.size[0] - image_np.shape[2]
         t_y = blended_img.size[1]-image_np.shape[1]
-        blended_img.paste(blend(base_img, mask, 0.7, var_mean), (t_x, t_y))
+        blended_img.paste(blend(base_img, mask, 0.5, var_mean), (t_x, t_y))
     else:
         color = get_prob_color_bigradient(gradient[2], 1)
         blended_np[:, :, 0].fill(color[0])
@@ -740,7 +741,7 @@ def blend_std_bigradient_thread(i, j, x_max, image_np, valid_bit_np, ens_predict
         blended_np[:, :, 1].fill(color[1])
         blended_np[:, :, 2].fill(color[2])
         mask = np_to_pil(blended_np, COLOR)
-        blended_img.paste(blend(base_img, mask, 0.7, var_mean), (j * image_np.shape[2], i * image_np.shape[1]))
+        blended_img.paste(blend(base_img, mask, 0.5, var_mean), (j * image_np.shape[2], i * image_np.shape[1]))
 
         k = 10
         location = (j * image_np.shape[2] + 10, i * image_np.shape[1] + k)
@@ -880,9 +881,9 @@ def get_color_std_bigradient():
     yellow = Color("Yellow")
     lgyellow = Color("LightGoldenrodYellow")
     white = Color("White")
-    gray = Color("#c8c8c8")
+    #gray = Color("#c8c8c8")
 
-    colors_h = list(gray.range_to(white, 69))
+    colors_h = list(lgyellow.range_to(white, 69))
     colors_adc = list(lgyellow.range_to(yellow, 42)) + list(yellow.range_to(dred, 27))
     gradient_h = []
     gradient_adc = []
@@ -906,9 +907,27 @@ def print_std_gradient():
 
 
 def print_std_bigradient():
-    gradient = get_color_std_gradient()
-    image = np_to_pil(gradient,COLOR)
-    save_image(image,RESOURCE_FOLDER,"std_gradient")
+    image_np = np.zeros((30,414,3),"uint8")
+    gradient = get_color_std_bigradient()
+    lst = gradient[2]
+    lst.reverse()
+
+    for i in range(0,30):
+        for j in range(0,207):
+            image_np[i][j][0] = lst[math.floor(j/3)][0]
+            image_np[i][j][1] = lst[math.floor(j/3)][1]
+            image_np[i][j][2] = lst[math.floor(j/3)][2]
+    for i in range(0,30):
+        for j in range(207,414):
+            idx = math.floor((j-207)/3)
+            x = gradient[0][idx][0]
+            y = gradient[0][idx][1]
+            z = gradient[0][idx][2]
+            image_np[i][j][0] = x
+            image_np[i][j][1] = y
+            image_np[i][j][2] = z
+    image = np_to_pil(image_np,COLOR)
+    save_image(image,RESOURCE_FOLDER,"std_bigradient")
 
 
 def get_prob_color(gradient, probability):

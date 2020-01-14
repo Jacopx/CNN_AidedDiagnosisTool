@@ -13,9 +13,7 @@ import src.cnn.testCNN as convNet
 from src.preparation import datasetManager as dm, utils
 from src.parameters import *
 import gc
-import mem_top
 from os import path
-import numpy as np
 import src.preparation.blender as blnd
 
 
@@ -40,10 +38,8 @@ def make_prediction(path_list, crop_size, dr, iterations):
             log.print_debug("PROCESSING "+ file +" dr:" + str(dr) + " iter:" + str(iterations) + " Crop Size" + str(crop_size))
             basename = str(path.basename(file).split(".", 1)[0])
             pred_folder = path.join("resources", "predictions", str(dr))
-            filename_gradient = basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient"
-            filename_lienar = basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_linear"
-            filename_std = basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_std_gradient"
-            filename_std_bi = basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_std_bigradient"
+            suffix = "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations)
+            filename_std_bi      = basename + suffix + "_std_bigradient"
             filename = basename + "_CS" + str(crop_size)
 
             if not path.isfile(path.join(pred_folder, basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred")):
@@ -59,32 +55,6 @@ def make_prediction(path_list, crop_size, dr, iterations):
             slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
             valid_bit_np = dm.read_blob(basename + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
 
-            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_gradient + ".png")):
-                if iterations == 1:
-                    image = blnd.blend_np_multiple_gradient(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, False, crop_size)
-                else:
-                    image = blnd.blend_np_multiple_gradient(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, True, crop_size)
-                utils.save_image(image, SEGMENTED_FOLDER, filename_gradient)
-
-            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_lienar + ".png")):
-                if iterations == 1:
-                    image = blnd.blend_np(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, False, crop_size)
-                else:
-                    image = blnd.blend_np(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, True, crop_size)
-                utils.save_image(image, SEGMENTED_FOLDER, filename_lienar)
-
-            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std + ".png")):
-                if iterations == 1:
-                    image = blnd.blend_np_std_gradient(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, False, crop_size)
-                else:
-                    image = blnd.blend_np_std_gradient(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, True, crop_size)
-                utils.save_image(image, SEGMENTED_FOLDER, filename_std)
             if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std_bi + ".png")):
                 if iterations == 1:
                     image = blnd.blend_np_std_bigradient(np_flatten_image, ens_predictions_np, valid_bit_np,
@@ -102,7 +72,7 @@ def make_prediction(path_list, crop_size, dr, iterations):
                 image = blnd.save_np_image(np_flatten_image, slide_size, crop_size)
                 utils.save_image(image, SEGMENTED_FOLDER, basename + "_CS" + str(crop_size))
 
-            prediction_images_path.append([path.join(SEGMENTED_FOLDER, filename + ".png"), path.join(SEGMENTED_FOLDER, filename_gradient + ".png")])
+            prediction_images_path.append([path.join(SEGMENTED_FOLDER, filename + ".png"), path.join(SEGMENTED_FOLDER, filename_std_bi + ".png")])
 
             elapsed_time = time.time() - start_time
             log.print_debug(basename + "_CS" + str(crop_size) + "_DR" + str(dr).replace("0.", "") + "_ITER" + str(iterations) + "_gradient" + ": " + str(elapsed_time))
@@ -111,7 +81,10 @@ def make_prediction(path_list, crop_size, dr, iterations):
             log.print_debug(file + "doesn't exist.")
     return prediction_images_path
 
-
+# Produce predictions samples provided in MAP folder
+# Parameters : image -> PIL.Image to be scaled
+#              scale_factor -> factor by which image has to be scaled
+# Return : the resized image
 def produce_images():
     crop_sizes = [2240, 4480]
     iter = [1, 10]
@@ -133,8 +106,7 @@ def produce_images():
 
 def main():
     utils.test_folder()
-    produce_images()
-    # utils.test_folder()
+
     return 0
 
 

@@ -9,12 +9,14 @@ from PIL import Image, ImageFont, ImageDraw
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt2
+import matplotlib.pyplot as plt3
 import matplotlib.image as mpimg
 import logger as log
 import time
 from threading import Thread
 from src.parameters import *
-from math import ceil
+import math
 from colour import Color
 
 
@@ -103,9 +105,44 @@ def plot_histogram_lum(image):
     plt.show()
 
 
+def plot_var_distribution(file_path, ens_prediction, valid_bit_np):
+    log_data_ac = []
+    log_data_ad = []
+    log_data_h = []
+    for i in range(0, len(ens_prediction[0])):
+        if valid_bit_np[i]==1:
+            if ens_prediction[0][i] == 0:
+                if ens_prediction[2][i] != 0:
+                    log_data_ac.append(math.log10(ens_prediction[2][i]))
+
+            if ens_prediction[0][i] == 1:
+                if ens_prediction[2][i] != 0:
+                    log_data_ad.append(math.log10(ens_prediction[2][i]))
+
+            if ens_prediction[0][i] == 2:
+                if ens_prediction[2][i] != 0:
+                    log_data_h.append(math.log10(ens_prediction[2][i]))
+
+    plt.hist(log_data_ac, bins=25)
+    plt.xlabel("Log10(var)")
+    plt.title = path.basename(file_path)+"_ac"
+    plt.savefig(file_path+"_ac.png")
+    plt.clf()
+    plt2.hist(log_data_ad, bins=25)
+    plt.xlabel("Log10(var)")
+    plt2.title = path.basename(file_path)+"_ac"
+    plt2.savefig(file_path+"_ad.png")
+    plt2.clf()
+    plt3.hist(log_data_h, bins=25)
+    plt.xlabel("Log10(var)")
+    plt3.title = path.basename(file_path)+"_ac"
+    plt3.savefig(file_path+"_h.png")
+    plt3.clf()
+
+
 def plot_image(image):
     img = mpimg.imread(image)
-    plt.imshow(img)
+    plt.imshow()
     plt.show()
 
 

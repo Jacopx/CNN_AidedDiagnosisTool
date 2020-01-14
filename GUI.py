@@ -52,16 +52,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.main_label)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.image = QtWidgets.QLabel(self.centralwidget)
-        self.image.setGeometry(QtCore.QRect(0, 89, 1920, 941))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.image.sizePolicy().hasHeightForWidth())
-        self.image.setSizePolicy(sizePolicy)
-        self.image.setText("")
-        self.image.setAlignment(QtCore.Qt.AlignCenter)
-        self.image.setObjectName("image")
+
+        self.viewer = PhotoViewer(self.centralwidget)
+        self.viewer.setGeometry(QtCore.QRect(0, 50, 1941, 981))
+        self.viewer.setObjectName("viewer")
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -93,7 +88,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.clear_button.setText(_translate("MainWindow", "Clear"))
         self.mask_button.setText(_translate("MainWindow", "Mask"))
-        self.image.setText(_translate("MainWindow", "Image"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionOpen.setText(_translate("MainWindow", "Open..."))
         self.actionOpen.setStatusTip(_translate("MainWindow", "Open a file"))
@@ -128,6 +122,7 @@ class Ui_MainWindow(object):
             crop = int(self.crop_combo.currentText())
             drop = float(self.dropout_combo.currentText())
             self.out_file = main.make_prediction(file_name[0], crop, drop, 1)
+
             self.show_img(self.out_file[0][1])
 
     def mask_change(self):
@@ -140,20 +135,15 @@ class Ui_MainWindow(object):
 
     # Show image
     def show_img(self, path):
-        width = self.centralwidget.width()
-        height = self.centralwidget.height()
+        self.viewer.setPhoto(QtGui.QPixmap(path))
 
-        pix = QtGui.QPixmap(path)
+    def pixInfo(self):
+        self.viewer.toggleDragMode()
 
-        if pix.height() >= height:
-            pix = pix.scaledToHeight(height)
-        elif pix.width() >= width:
-            pix = pix.scaledToWidth(width)
-        else:
-            pix = pix.scaledToHeight(720)
-            pix = pix.scaledToWidth(1280)
+    def photoClicked(self, pos):
+        if self.viewer.dragMode() == QtWidgets.QGraphicsView.NoDrag:
+            self.editPixInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
-        self.image.setPixmap(pix)
 
     # Clear image
     def clear_img(self):
@@ -177,6 +167,80 @@ class Ui_MainWindow(object):
             print('File saved...')
         else:
             print('File NOT saved')
+
+
+class PhotoViewer(QtWidgets.QGraphicsView):
+    photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
+
+    def __init__(self, parent):
+        super(PhotoViewer, self).__init__(parent)
+        self._zoom = 0
+        self._empty = True
+        self._scene = QtWidgets.QGraphicsScene(self)
+        self._photo = QtWidgets.QGraphicsPixmapItem()
+        self._scene.addItem(self._photo)
+        self.setScene(self._scene)
+        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+
+    def hasPhoto(self):
+        return not self._empty
+
+    def fitInView(self, scale=True):
+        rect = QtCore.QRectF(self._photo.pixmap().rect())
+        if not rect.isNull():
+            self.setSceneRect(rect)
+            if self.hasPhoto():
+                unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
+                self.scale(1 / unity.width(), 1 / unity.height())
+                viewrect = self.viewport().rect()
+                scenerect = self.transform().mapRect(rect)
+                factor = min(viewrect.width() / scenerect.width(),
+                             viewrect.height() / scenerect.height())
+                self.scale(factor, factor)
+            self._zoom = 0
+
+    def setPhoto(self, pixmap=None):
+        self._zoom = 0
+        if pixmap and not pixmap.isNull():
+            self._empty = False
+            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+            self._photo.setPixmap(pixmap)
+        else:
+            self._empty = True
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+            self._photo.setPixmap(QtGui.QPixmap())
+        self.fitInView()
+
+    def wheelEvent(self, event):
+        if self.hasPhoto():
+            if event.angleDelta().y() > 0:
+                factor = 1.25
+                self._zoom += 1
+            else:
+                factor = 0.8
+                self._zoom -= 1
+            if self._zoom > 0:
+                self.scale(factor, factor)
+            elif self._zoom == 0:
+                self.fitInView()
+            else:
+                self._zoom = 0
+
+    def toggleDragMode(self):
+        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+        elif not self._photo.pixmap().isNull():
+            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
+
+    def mousePressEvent(self, event):
+        if self._photo.isUnderMouse():
+            self.photoClicked.emit(self.mapToScene(event.pos()).toPoint())
+        super(PhotoViewer, self).mousePressEvent(event)
 
 
 if __name__ == "__main__":

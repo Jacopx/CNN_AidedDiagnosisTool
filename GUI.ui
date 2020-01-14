@@ -66,26 +66,14 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLabel" name="image">
+   <widget class="QGraphicsView" name="viewer">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>89</y>
-      <width>1920</width>
-      <height>941</height>
+      <y>50</y>
+      <width>1941</width>
+      <height>981</height>
      </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>

@@ -73,9 +73,17 @@ class Ui_MainWindow(object):
         self.main_label.setObjectName("main_label")
         self.horizontalLayout.addWidget(self.main_label)
 
+        self.label = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.label.setObjectName("label")
+        self.horizontalLayout.addWidget(self.label)
+
         self.legend_viewer = PhotoViewer.PhotoViewer(self.centralwidget)
         self.legend_viewer.setObjectName("legend_viewer")
         self.horizontalLayout.addWidget(self.legend_viewer)
+
+        self.label_2 = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout.addWidget(self.label_2)
 
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
@@ -123,9 +131,8 @@ class Ui_MainWindow(object):
         self.actionOpen.setText(_translate("MainWindow", "Open..."))
         self.actionOpen.setStatusTip(_translate("MainWindow", "Open a file"))
         self.actionOpen.setShortcut(_translate("MainWindow", "Ctrl+O"))
-        # self.actionSavePNG.setText(_translate("MainWindow", "Save as PNG"))
-        # self.actionSavePNG.setStatusTip(_translate("MainWindow", "Save map with highlights in PNG format"))
-        # self.actionSavePNG.setShortcut(_translate("MainWindow", "Ctrl+S"))
+        self.label.setText(_translate("MainWindow", "H"))
+        self.label_2.setText(_translate("MainWindow", "SIC"))
         self.actionQuit.setText(_translate("MainWindow", "Quit"))
 
     # Function to define correlations to actions

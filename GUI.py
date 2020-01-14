@@ -124,13 +124,17 @@ class Ui_MainWindow(object):
 
             self.out_file = main.make_prediction(file_name[0], crop, drop, 1)
             self.show_img(self.out_file[0][1])
+            self.mask = True
+            self.main_label.setText(self.out_file[0][1])
 
     def mask_change(self):
         if self.mask:
             self.show_img(self.out_file[0][0])
+            self.main_label.setText(self.out_file[0][0])
             self.mask = False
         else:
             self.show_img(self.out_file[0][1])
+            self.main_label.setText(self.out_file[0][1])
             self.mask = True
 
     # Show image

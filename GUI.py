@@ -72,6 +72,11 @@ class Ui_MainWindow(object):
         self.main_label = QtWidgets.QLabel(self.horizontalLayoutWidget)
         self.main_label.setObjectName("main_label")
         self.horizontalLayout.addWidget(self.main_label)
+
+        self.legend_viewer = PhotoViewer.PhotoViewer(self.centralwidget)
+        self.legend_viewer.setObjectName("legend_viewer")
+        self.horizontalLayout.addWidget(self.legend_viewer)
+
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
 
@@ -160,6 +165,7 @@ class Ui_MainWindow(object):
             self.mask_button.setDisabled(False)
             self.reload_button.setDisabled(False)
             self.main_label.setText(self.out_file[0][1])
+            self.legend_viewer.setPhoto(QtGui.QPixmap(self.out_file[0][1]))
 
     # Change from mask and no-mask rapidly
     def mask_change(self):
@@ -192,6 +198,7 @@ class Ui_MainWindow(object):
         self.reload_button.setDisabled(True)
         self.main_label.setText('')
         self.viewer.setPhoto()
+        self.legend_viewer.setPhoto()
 
 # MAIN
 if __name__ == "__main__":

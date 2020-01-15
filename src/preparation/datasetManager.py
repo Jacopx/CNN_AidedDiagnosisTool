@@ -248,6 +248,13 @@ def open_dataset():
     return X_train , y_train, X_test, y_test
 
 
+# Thread to produce crops of a row of the slide
+# Parameters :  slide_ -> a list of path
+#               y -> row id
+#               batch_to_predict -> list where crops are saved
+#               valid_bit_list-> list where validation bit are saved
+#               x_max-> maximum number of orizontal crop
+#               crop_size-> size of crop
 def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size):
     for x in range(0, x_max-1):
         image_crop = slide.read_slide_crop(slide_, x * crop_size, y * crop_size, crop_size).convert('RGB')
@@ -268,6 +275,13 @@ def custom_crop(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size):
     batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
+# Thread to produce crops at the border of the slide
+# Parameters :  slide_ -> a list of path
+#               y -> row id
+#               batch_to_predict -> list where crops are saved
+#               valid_bit_list-> list where validation bit are saved
+#               x_max-> maximum number of orizontal crop
+#               crop_size-> size of crop
 def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_size):
     for x in range(0, x_max-1):
         image_crop = slide.read_slide_crop(slide_, x * crop_size, slide.get_slide_size(slide_)[1] - crop_size, crop_size).convert('RGB')
@@ -288,6 +302,13 @@ def custom_crop_last(slide_, y, batch_to_predict, valid_bit_list, x_max, crop_si
     batch_to_predict[y*x_max+x_max-1] = resized_crop_np
 
 
+# Compute predictions according to parameters given a name. Image searched in MAP folder.
+# Parameters :  slidename -> the name of the slide
+#               crop_size -> the size of crops in which the image is cut
+#               drop_rate -> dropout rate
+#               iterations-> number of iteration for MCDropout
+#               pred_folder-> where prediction has to be saved
+# Return : the path of the masked image and the path of the original image
 def mc_predict(iterations, slidename, pred_folder, drop_rate, crop_size):
     mc_predictions = []
 
@@ -332,6 +353,13 @@ def mc_predict(iterations, slidename, pred_folder, drop_rate, crop_size):
     del batch_to_predict_np
 
 
+# Compute predictions according to parameters given a name. Image searched in file_path.
+# Parameters :  file_path ->file path
+#               crop_size -> the size of crops in which the image is cut
+#               drop_rate -> dropout rate
+#               iterations-> number of iteration for MCDropout
+#               pred_folder-> where prediction has to be saved
+# Return : the path of the masked image and the path of the original image
 def mc_predict_from_path(iterations, file_path, pred_folder, drop_rate, crop_size):
     mc_predictions = []
     slidename = str(path.basename(file_path))
@@ -376,6 +404,10 @@ def mc_predict_from_path(iterations, file_path, pred_folder, drop_rate, crop_siz
     del batch_to_predict_np
 
 
+# Save in a binary file
+# Parameters :  blob -> a binary object
+#               name -> name of the file
+#               directory -> directory where file will be saved
 def save_blob(blob, name, directory):
     blob_path = path.join(directory, name)
     pickle_out = open(blob_path, "wb")
@@ -383,6 +415,10 @@ def save_blob(blob, name, directory):
     pickle_out.close()
 
 
+# Load from binary file
+# Parameters :    name -> name of the file
+# #               directory -> directory where file is saved
+# Return : the path of the masked image and the path of the original image
 def read_blob(name, directory):
     blob_path = path.join(directory, name)
     pickle_in = open(blob_path, "rb")
@@ -391,6 +427,12 @@ def read_blob(name, directory):
     return blob
 
 
+# Compute predictions according to parameters
+# Parameters :  path_list -> a list of path
+#               crop_size -> the size of crops in which the image is cut
+#               dr        -> dropout rate
+#               iterations-> number of iteration for MCDropout
+# Return : the path of the masked image and the path of the original image
 def compute_ens_predictions(mc_predictions):
     idx = []
     prob = []
@@ -406,6 +448,12 @@ def compute_ens_predictions(mc_predictions):
     return idx, prob, unc, h_prob
 
 
+# Compute predictions according to parameters
+# Parameters :  path_list -> a list of path
+#               crop_size -> the size of crops in which the image is cut
+#               dr        -> dropout rate
+#               iterations-> number of iteration for MCDropout
+# Return : the path of the masked image and the path of the original image
 def get_crop_pred(mc_predictions, idx):
     p0 = np.array([p[idx] for p in mc_predictions])
     p0_mean = p0.mean(axis=0)

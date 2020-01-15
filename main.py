@@ -17,6 +17,8 @@ from os import path
 import src.preparation.blender as blnd
 
 
+# Train the network
+# Parameters :  drop_rate        -> dropout rate
 def train(drop_rate):
     X_train, y_train, X_test, y_test = dm.open_dataset()
     log.print_info(" TRAIN STATs")
@@ -29,7 +31,12 @@ def train(drop_rate):
     dm.print_stats(y_test)
     convNet.compile_model(X_train, y_train, X_test, y_test, drop_rate)
 
-
+# Compute predictions according to parameters
+# Parameters :  path_list -> a list of path
+#               crop_size -> the size of crops in which the image is cut
+#               dr        -> dropout rate
+#               iterations-> number of iteration for MCDropout
+# Return : the path of the masked image and the path of the original image
 def make_prediction(path_list, crop_size, dr, iterations):
     prediction_images_path = []
     for file in path_list:
@@ -82,9 +89,6 @@ def make_prediction(path_list, crop_size, dr, iterations):
     return prediction_images_path
 
 # Produce predictions samples provided in MAP folder
-# Parameters : image -> PIL.Image to be scaled
-#              scale_factor -> factor by which image has to be scaled
-# Return : the resized image
 def produce_images():
     crop_sizes = [2240, 4480]
     iter = [1, 10]

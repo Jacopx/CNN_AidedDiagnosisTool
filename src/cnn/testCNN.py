@@ -7,9 +7,11 @@ import tensorflow as tf
 from contextlib import redirect_stdout
 from src.parameters import *
 
-
+# Sequential model of the network
+# Parameters :  inputs    -> the input tensor
+#               drop_rate -> dropout rate
+# Return : the output prediction
 def normal_convolution_net(inputs, drop_rate):
-    x = layers.BatchNormalization
     # 3 * 3 * 64 convolution stride 1
     x = layers.ZeroPadding2D(padding=1)(inputs)
     x = layers.Conv2D(filters=64, kernel_size=3, strides=1, padding='valid', activation='relu',
@@ -111,6 +113,12 @@ def bayesian_cnn(inputs, drop_rate):
     return normal_convolution_net(inputs, drop_rate)
 
 
+# Compile model and train it
+# Parameters :  x_train -> train data set
+#               y_train -> train label set
+#               x_test -> test data set
+#               y_test -> test label set
+#               drop_rate -> dropout rate
 def compile_model(x_train, y_train, x_test, y_test, drop_rate):
 
     if tf.test.is_built_with_cuda:
@@ -154,41 +162,10 @@ def compile_model(x_train, y_train, x_test, y_test, drop_rate):
     log.print_info('Test accuracy : ' + str(scores[1]))
 
 
-
-def predict_from_model(batch_to_predict, drop_rate):
-    model_name = "224_10_32_0.0001_1e-06_0.1_True_2048_False_local.h5"
-    model_path = os.path.join(MODEL_FOLDER, model_name)
-    input_tensor = tf.keras.Input(shape=(224, 224, 3))
-    bayesian_model = models.Model(input_tensor, bayesian_cnn(inputs=input_tensor, drop_rate=drop_rate))
-    bayesian_model.load_weights(model_path, by_name=False)
-    log.print_info('Model loaded')
-    print(str(batch_to_predict.shape))
-    #return bayesian_model.predict(batch_to_predict, batch_to_predict.shape[0]);
-    prediction_list = []
-    i = 0
-    j = 0
-    k = 0
-    div = min(batch_to_predict.shape[0],40)
-    for i in range(0, batch_to_predict.shape[0]):
-        prediction_list.append(bayesian_model.predict(batch_to_predict[i:i+1], 1))
-        temp = int(batch_to_predict.shape[0]/div)
-        if (i % temp) == 0:
-            print("", end="\r")
-            print("Prediction status: ", end = '')
-            for j in range (0,int(i*div/batch_to_predict.shape[0])):
-                print("#", end = '')
-            for k in range(j, div):
-                print("=", end = '')
-            perc = int(i * 100 / batch_to_predict.shape[0])
-            print(" "+str(perc)+" %", end = '')
-    print("", end="\r")
-    print("Prediction status: ", end='')
-    for k in range(0, div):
-        print("#", end='')
-    print(" 100%")
-    return prediction_list
-
-
+# Load a trained model
+# Parameters :  model_name -> name of the model to lad
+#               drop_rates -> dropout rate
+# Return : a keras.Model object with initialized weights
 def load_model(model_name, drop_rate):
     model_path = os.path.join(MODEL_FOLDER, model_name)
     input_tensor = tf.keras.Input(shape=(224, 224, 3))
@@ -198,6 +175,10 @@ def load_model(model_name, drop_rate):
     return bayesian_model
 
 
+# Load model and compute predictions
+# Parameters :  batch_to_predict -> list of input crops
+#               drop_rate        -> dropout rate
+# Return : the list of predictions for each crop
 def predict_from_model_multithread(batch_to_predict, drop_rate):
     bayesian_model = load_model("224_10_32_0.0001_1e-06_"+str(drop_rate)+"_True_2048_False_local.h5", drop_rate)
     predictions = bayesian_model.predict(batch_to_predict, batch_size=BATCH_SIZE, verbose=1, workers=100, use_multiprocessing=True)

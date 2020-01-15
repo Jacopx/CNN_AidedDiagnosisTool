@@ -55,7 +55,7 @@ def get_prediction_mask(prediction_matrix, valid_bit_matrix):
 #
 # no gradient RED YELLOW WHITE
 #
-
+@DeprecationWarning
 def blend_np(image_np, ens_prediction, valid_bit_np, slide_size, print_std, crop_size):
     global PRINT_STD
     PRINT_STD = print_std
@@ -86,7 +86,7 @@ def blend_np(image_np, ens_prediction, valid_bit_np, slide_size, print_std, crop
         p.join()
     return blended_img
 
-
+@DeprecationWarning
 def blend_last_column_thread(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = i * x_max + x_max - 1
@@ -116,7 +116,7 @@ def blend_last_column_thread(i, x_max, image_np, valid_bit_np, ens_prediction, b
         t_y = i * image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_last_row_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = i * x_max + j
@@ -147,7 +147,7 @@ def blend_last_row_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, b
         t_y = blended_img.size[1] - image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, var_mean), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_last(image_np, valid_bit_np, ens_prediction, blended_img):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = -1
@@ -177,7 +177,7 @@ def blend_last(image_np, valid_bit_np, ens_prediction, blended_img):
         t_y = blended_img.size[1] - image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     helvetica = ImageFont.truetype(font=font_, size=20)
@@ -225,7 +225,7 @@ def blend_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_im
 #
 # (prob+(1 - std))/2 gradient RED YELLOW GREEN
 #
-
+@DeprecationWarning
 def blend_np_multiple_gradient(image_np, ens_prediction, valid_bit_np, slide_size, print_std, crop_size):
     global PRINT_STD
     PRINT_STD = print_std
@@ -257,7 +257,7 @@ def blend_np_multiple_gradient(image_np, ens_prediction, valid_bit_np, slide_siz
         p.join()
     return blended_img
 
-
+@DeprecationWarning
 def blend_last_column_multiple_gradient_thread(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = i * x_max + x_max - 1
@@ -290,7 +290,7 @@ def blend_last_column_multiple_gradient_thread(i, x_max, image_np, valid_bit_np,
         t_y = i * image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_last_row_multiple_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = i * x_max + j
@@ -323,7 +323,7 @@ def blend_last_row_multiple_gradient_thread(i, j, x_max, image_np, valid_bit_np,
         t_y = blended_img.size[1] - image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_last_multiple_gradient(image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = -1
@@ -355,7 +355,7 @@ def blend_last_multiple_gradient(image_np, valid_bit_np, ens_prediction, blended
         t_y = blended_img.size[1] - image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_multiple_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     helvetica = ImageFont.truetype(font=font_, size=20)
@@ -406,7 +406,7 @@ def blend_multiple_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_pred
 #
 #  (1 - std) gradient RED YELLOW WHITE
 #
-
+@DeprecationWarning
 def blend_np_std_gradient(image_np, ens_prediction, valid_bit_np, slide_size, print_std, crop_size):
     global PRINT_STD
     PRINT_STD = print_std
@@ -439,7 +439,7 @@ def blend_np_std_gradient(image_np, ens_prediction, valid_bit_np, slide_size, pr
         p.join()
     return blended_img
 
-
+@DeprecationWarning
 def blend_last_column_std_gradient_thread(i, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = i * x_max + x_max - 1
@@ -472,7 +472,7 @@ def blend_last_column_std_gradient_thread(i, x_max, image_np, valid_bit_np, ens_
         t_y = i * image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_last_row_std_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = i * x_max + j
@@ -505,7 +505,7 @@ def blend_last_row_std_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_
         t_y = blended_img.size[1] - image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_last_std_gradient(image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     index = -1
@@ -537,7 +537,7 @@ def blend_last_std_gradient(image_np, valid_bit_np, ens_prediction, blended_img,
         t_y = blended_img.size[1] - image_np.shape[1]
         blended_img.paste(blend(base_img, mask, 0.5, 1), (t_x, t_y))
 
-
+@DeprecationWarning
 def blend_std_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_prediction, blended_img, gradient):
     blended_np = np.zeros((image_np.shape[1], image_np.shape[2], 3), dtype='uint8')
     helvetica = ImageFont.truetype(font=font_, size=20)
@@ -587,7 +587,7 @@ def blend_std_gradient_thread(i, j, x_max, image_np, valid_bit_np, ens_predictio
         blended_img.paste(blend(base_img, mask, 0.5, 1), (j * image_np.shape[2], i * image_np.shape[1]))
 
 #
-#  (1 - std) gradient RED-YELLOW WHITE
+#  (1 - std) dual gradient RED-YELLOW-WHITE
 #
 
 def blend_np_std_bigradient(image_np, ens_prediction, valid_bit_np, slide_size, print_std, crop_size):
@@ -770,7 +770,7 @@ def blend_std_bigradient_thread(i, j, x_max, image_np, valid_bit_np, ens_predict
 
 
 #
-# Resize image
+# Resized image save routines
 #
 
 def save_np_image(image_np, slide_size, crop_size):
@@ -833,6 +833,8 @@ def save_np_thread(i, j, x_max, image_np, blended_img):
     blended_img.paste(base_img, (j * image_np.shape[2], i * image_np.shape[1]))
 
 
+
+@DeprecationWarning
 def get_color_multiple_gradient():
     red = Color("Red")
     orange = Color("Orange")
@@ -852,7 +854,7 @@ def get_color_multiple_gradient():
         gradient_ac.append([int(c.get_red() * 255), int(c.get_green() * 255), int(c.get_blue() * 255)])
     return [gradient_ac, gradient_ad, gradient_h]
 
-
+@DeprecationWarning
 def get_color_std_gradient():
     red = Color("OrangeRed")
     dred = Color("DarkRed")
@@ -893,13 +895,13 @@ def get_color_std_bigradient():
         gradient_adc.append([int(c.get_red() * 255), int(c.get_green() * 255), int(c.get_blue() * 255)])
     return [gradient_adc, gradient_adc, gradient_h]
 
-
+@DeprecationWarning
 def print_multiple_gradient():
     gradient = get_color_multiple_gradient()
     image = np_to_pil(gradient,COLOR)
     save_image(image,RESOURCE_FOLDER,"gradient")
 
-
+@DeprecationWarning
 def print_std_gradient():
     gradient = get_color_std_gradient()
     image = np_to_pil(gradient,COLOR)
@@ -929,12 +931,12 @@ def print_std_bigradient():
     image = np_to_pil(image_np,COLOR)
     save_image(image,RESOURCE_FOLDER,"std_bigradient")
 
-
+@DeprecationWarning
 def get_prob_color(gradient, probability):
     idx = int(probability * 100)
     return gradient[idx]
 
-
+@DeprecationWarning
 def get_class_color(class_idx):
     color = [Color("DarkRed"), Color("Yellow"), Color("White")]
     return [int(color[class_idx].get_red() * 255), int(color[class_idx].get_green() * 255), int(color[class_idx].get_blue() * 255)]
@@ -942,14 +944,13 @@ def get_class_color(class_idx):
 
 def get_prob_color_bigradient(gradient, probability):
     idx = int(probability * 100) - 32
-    grad = gradient[idx]
-    return grad
+    return gradient[idx]
 
-
+@DeprecationWarning
 def get_std_color(gradient, var_mean):
     idx = int(var_mean * 100)
     return gradient[idx]
 
 
-def blend(image, mask, factor, unc):
-    return Image.blend(image, mask, factor * unc)
+def blend(image, mask, factor, cert):
+    return Image.blend(image, mask, factor * cert)

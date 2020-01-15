@@ -17,7 +17,7 @@ PRINT_STD = "true"
 
 font_ = os.path.join(PREPARATION_FOLDER,"arial.ttf")
 
-
+@DeprecationWarning
 def get_prediction_mask(prediction_matrix, valid_bit_matrix):
     block_size = 224
     prediction_mask = np.zeros((prediction_matrix.shape[0] * block_size, prediction_matrix.shape[1] * block_size, ))

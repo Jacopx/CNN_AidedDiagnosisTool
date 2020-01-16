@@ -49,7 +49,7 @@ def make_prediction(path_list, crop_size, dr, iterations):
             filename_std_bi      = basename + suffix + "_std_bigradient"
             filename = basename + "_CS" + str(crop_size)
 
-            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std_bi+ ".png")) and not path.isfile(path.join(SEGMENTED_FOLDER, filename + ".png")):
+            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std_bi+ ".png")) or not path.isfile(path.join(SEGMENTED_FOLDER, filename + ".png")):
                 if not path.isfile(path.join(pred_folder, basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred")):
                     dm.mc_predict_from_path(iterations, file, pred_folder, dr, crop_size)
                 mc_predictions = dm.read_blob(basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred", pred_folder)

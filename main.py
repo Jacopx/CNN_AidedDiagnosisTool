@@ -49,35 +49,36 @@ def make_prediction(path_list, crop_size, dr, iterations):
             filename_std_bi      = basename + suffix + "_std_bigradient"
             filename = basename + "_CS" + str(crop_size)
 
-            if not path.isfile(path.join(pred_folder, basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred")):
-                dm.mc_predict_from_path(iterations, file, pred_folder, dr, crop_size)
-            mc_predictions = dm.read_blob(basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred", pred_folder)
-            if not path.isfile(path.join(pred_folder, basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens")):
-                ens_predictions_np = dm.compute_ens_predictions(mc_predictions)
-                dm.save_blob(ens_predictions_np, basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens",
-                             pred_folder)
-            ens_predictions_np = dm.read_blob(basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens",
-                             pred_folder)
-            np_flatten_image = dm.read_blob(basename + "_" + str(crop_size) + ".bin", MAP_FOLDER)
-            slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
-            valid_bit_np = dm.read_blob(basename + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
+            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std_bi+ ".png")) and not path.isfile(path.join(SEGMENTED_FOLDER, filename + ".png")):
+                if not path.isfile(path.join(pred_folder, basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred")):
+                    dm.mc_predict_from_path(iterations, file, pred_folder, dr, crop_size)
+                mc_predictions = dm.read_blob(basename + "_" + str(crop_size) + "_" + str(iterations) + ".pred", pred_folder)
+                if not path.isfile(path.join(pred_folder, basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens")):
+                    ens_predictions_np = dm.compute_ens_predictions(mc_predictions)
+                    dm.save_blob(ens_predictions_np, basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens",
+                                 pred_folder)
+                ens_predictions_np = dm.read_blob(basename + "_" + str(crop_size) + "_" + str(iterations) + ".ens",
+                                 pred_folder)
+                np_flatten_image = dm.read_blob(basename + "_" + str(crop_size) + ".bin", MAP_FOLDER)
+                slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
+                valid_bit_np = dm.read_blob(basename + "_" + str(crop_size) + ".vbit", MAP_FOLDER)
 
-            if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std_bi + ".png")):
-                if iterations == 1:
-                    image = blnd.blend_np_std_bigradient(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, False, crop_size)
-                else:
-                    image = blnd.blend_np_std_bigradient(np_flatten_image, ens_predictions_np, valid_bit_np,
-                                                             slide_size, True, crop_size)
-                utils.save_image(image, SEGMENTED_FOLDER, filename_std_bi)
+                if not path.isfile(path.join(SEGMENTED_FOLDER, filename_std_bi + ".png")):
+                    if iterations == 1:
+                        image = blnd.blend_np_std_bigradient(np_flatten_image, ens_predictions_np, valid_bit_np,
+                                                                 slide_size, False, crop_size)
+                    else:
+                        image = blnd.blend_np_std_bigradient(np_flatten_image, ens_predictions_np, valid_bit_np,
+                                                                 slide_size, True, crop_size)
+                    utils.save_image(image, SEGMENTED_FOLDER, filename_std_bi)
 
-            if not path.isfile(path.join(SEGMENTED_FOLDER, filename + ".png")) and path.isfile(path.join(MAP_FOLDER, basename + "_" + str(crop_size) + ".bin")):
-                if np_flatten_image is None:
-                    np_flatten_image = dm.read_blob(basename + "_" + str(crop_size) + ".bin", MAP_FOLDER)
-                if slide_size is None:
-                    slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
-                image = blnd.save_np_image(np_flatten_image, slide_size, crop_size)
-                utils.save_image(image, SEGMENTED_FOLDER, basename + "_CS" + str(crop_size))
+                if not path.isfile(path.join(SEGMENTED_FOLDER, filename + ".png")) and path.isfile(path.join(MAP_FOLDER, basename + "_" + str(crop_size) + ".bin")):
+                    if np_flatten_image is None:
+                        np_flatten_image = dm.read_blob(basename + "_" + str(crop_size) + ".bin", MAP_FOLDER)
+                    if slide_size is None:
+                        slide_size = dm.read_blob(basename + ".info", MAP_FOLDER)
+                    image = blnd.save_np_image(np_flatten_image, slide_size, crop_size)
+                    utils.save_image(image, SEGMENTED_FOLDER, basename + "_CS" + str(crop_size))
 
             prediction_images_path.append([path.join(SEGMENTED_FOLDER, filename + ".png"), path.join(SEGMENTED_FOLDER, filename_std_bi + ".png")])
 

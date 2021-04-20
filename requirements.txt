@@ -44,7 +44,7 @@ Pillow==6.0.0
 pip-check==2.5.2
 pluggy==0.13.0
 protobuf==3.8.0
-py==1.8.0
+py==1.10.0
 pyparsing==2.4.0
 pyreadline==2.1
 pytest==5.1.3

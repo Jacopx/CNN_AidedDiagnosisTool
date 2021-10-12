@@ -35,7 +35,7 @@ more-itertools==7.2.0
 networkx==2.3
 numpy==1.16.4
 olefile==0.46
-opencv-python==4.1.0.25
+opencv-python==4.2.0.32
 openslide-python==1.1.1
 packaging==19.2
 pandas==0.23.4

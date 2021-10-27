@@ -11,7 +11,7 @@ colour==0.1.5
 contextlib2==0.5.5
 cycler==0.10.0
 Cython==0.29.10
-dask==1.2.2
+dask==2021.10.0
 decorator==4.4.0
 dm-sonnet==1.34
 gast==0.2.0

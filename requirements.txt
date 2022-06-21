@@ -33,7 +33,7 @@ mem-top==0.1.6
 mock==3.0.5
 more-itertools==7.2.0
 networkx==2.3
-numpy==1.16.4
+numpy==1.22.0
 olefile==0.46
 opencv-python==4.1.0.25
 openslide-python==1.1.1
